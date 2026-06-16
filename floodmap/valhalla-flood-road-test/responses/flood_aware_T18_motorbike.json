@@ -1,0 +1,246 @@
+{
+  "ok": true,
+  "status": 200,
+  "json": {
+    "trip": {
+      "locations": [
+        {
+          "type": "break",
+          "lat": 21.0214,
+          "lon": 105.761,
+          "side_of_street": "left",
+          "original_index": 0
+        },
+        {
+          "type": "break",
+          "lat": 21.0225,
+          "lon": 105.765,
+          "original_index": 1
+        }
+      ],
+      "legs": [
+        {
+          "maneuvers": [
+            {
+              "type": 3,
+              "instruction": "Drive west on Ngách 47 Ngõ 16 Phố Đỗ Xuân Hợp.",
+              "verbal_succinct_transition_instruction": "Drive west.",
+              "verbal_pre_transition_instruction": "Drive west on Ngách 47 Ngõ 16 Phố Đỗ Xuân Hợp.",
+              "verbal_post_transition_instruction": "Continue for 600 meters.",
+              "street_names": [
+                "Ngách 47 Ngõ 16 Phố Đỗ Xuân Hợp"
+              ],
+              "bearing_after": 272,
+              "time": 69.534,
+              "length": 0.577,
+              "cost": 206.947,
+              "begin_shape_index": 0,
+              "end_shape_index": 18,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 10,
+              "instruction": "Turn right onto Đường Nguyễn Văn Giáp.",
+              "verbal_transition_alert_instruction": "Turn right onto Đường Nguyễn Văn Giáp.",
+              "verbal_succinct_transition_instruction": "Turn right.",
+              "verbal_pre_transition_instruction": "Turn right onto Đường Nguyễn Văn Giáp.",
+              "verbal_post_transition_instruction": "Continue for 1 kilometer.",
+              "street_names": [
+                "Đường Nguyễn Văn Giáp"
+              ],
+              "bearing_before": 299,
+              "bearing_after": 9,
+              "time": 107.52,
+              "length": 1.192,
+              "cost": 200.307,
+              "begin_shape_index": 18,
+              "end_shape_index": 58,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 10,
+              "instruction": "Turn right onto Phố Trần Hữu Dực.",
+              "verbal_transition_alert_instruction": "Turn right onto Phố Trần Hữu Dực.",
+              "verbal_succinct_transition_instruction": "Turn right.",
+              "verbal_pre_transition_instruction": "Turn right onto Phố Trần Hữu Dực.",
+              "verbal_post_transition_instruction": "Continue for 900 meters.",
+              "street_names": [
+                "Phố Trần Hữu Dực"
+              ],
+              "bearing_before": 360,
+              "bearing_after": 109,
+              "time": 84.143,
+              "length": 0.94,
+              "cost": 243.997,
+              "begin_shape_index": 58,
+              "end_shape_index": 74,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 10,
+              "instruction": "Turn right onto Đường Lê Đức Thọ.",
+              "verbal_transition_alert_instruction": "Turn right onto Đường Lê Đức Thọ.",
+              "verbal_succinct_transition_instruction": "Turn right. Then Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "verbal_pre_transition_instruction": "Turn right onto Đường Lê Đức Thọ. Then Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "verbal_post_transition_instruction": "Continue for 200 meters.",
+              "street_names": [
+                "Đường Lê Đức Thọ"
+              ],
+              "bearing_before": 109,
+              "bearing_after": 198,
+              "time": 18.11,
+              "length": 0.218,
+              "cost": 63.71,
+              "begin_shape_index": 74,
+              "end_shape_index": 84,
+              "has_time_restrictions": true,
+              "verbal_multi_cue": true,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 26,
+              "instruction": "Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "verbal_transition_alert_instruction": "Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "verbal_succinct_transition_instruction": "Enter the roundabout and take the 2nd exit.",
+              "verbal_pre_transition_instruction": "Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "bearing_before": 208,
+              "bearing_after": 237,
+              "time": 4.652,
+              "length": 0.054,
+              "cost": 17.525,
+              "begin_shape_index": 84,
+              "end_shape_index": 91,
+              "roundabout_exit_count": 2,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 27,
+              "instruction": "Exit the roundabout onto Đường Lê Đức Thọ.",
+              "verbal_succinct_transition_instruction": "Exit the roundabout.",
+              "verbal_pre_transition_instruction": "Exit the roundabout onto Đường Lê Đức Thọ.",
+              "verbal_post_transition_instruction": "Continue for 200 meters.",
+              "street_names": [
+                "Đường Lê Đức Thọ"
+              ],
+              "bearing_before": 160,
+              "bearing_after": 202,
+              "time": 17.856,
+              "length": 0.218,
+              "cost": 53.229,
+              "begin_shape_index": 91,
+              "end_shape_index": 96,
+              "has_time_restrictions": true,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 26,
+              "instruction": "Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "verbal_transition_alert_instruction": "Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "verbal_succinct_transition_instruction": "Enter the roundabout and take the 2nd exit.",
+              "verbal_pre_transition_instruction": "Enter the roundabout and take the 2nd exit onto Đường Lê Đức Thọ.",
+              "bearing_before": 202,
+              "bearing_after": 202,
+              "time": 2.167,
+              "length": 0.015,
+              "cost": 14.385,
+              "begin_shape_index": 96,
+              "end_shape_index": 100,
+              "roundabout_exit_count": 2,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 27,
+              "instruction": "Exit the roundabout onto Đường Lê Đức Thọ.",
+              "verbal_succinct_transition_instruction": "Exit the roundabout.",
+              "verbal_pre_transition_instruction": "Exit the roundabout onto Đường Lê Đức Thọ.",
+              "verbal_post_transition_instruction": "Continue for 200 meters.",
+              "street_names": [
+                "Đường Lê Đức Thọ"
+              ],
+              "bearing_before": 202,
+              "bearing_after": 200,
+              "time": 19.464,
+              "length": 0.243,
+              "cost": 64.873,
+              "begin_shape_index": 100,
+              "end_shape_index": 107,
+              "has_time_restrictions": true,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 10,
+              "instruction": "Turn right.",
+              "verbal_transition_alert_instruction": "Turn right.",
+              "verbal_succinct_transition_instruction": "Turn right. Then You will arrive at your destination.",
+              "verbal_pre_transition_instruction": "Turn right. Then You will arrive at your destination.",
+              "verbal_post_transition_instruction": "Continue for 30 meters.",
+              "bearing_before": 185,
+              "bearing_after": 268,
+              "time": 8.701,
+              "length": 0.025,
+              "cost": 164.837,
+              "begin_shape_index": 107,
+              "end_shape_index": 108,
+              "verbal_multi_cue": true,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            },
+            {
+              "type": 4,
+              "instruction": "You have arrived at your destination.",
+              "verbal_transition_alert_instruction": "You will arrive at your destination.",
+              "verbal_pre_transition_instruction": "You have arrived at your destination.",
+              "bearing_before": 268,
+              "time": 0.0,
+              "length": 0.0,
+              "cost": 0.0,
+              "begin_shape_index": 108,
+              "end_shape_index": 108,
+              "travel_mode": "drive",
+              "travel_type": "motor_scooter"
+            }
+          ],
+          "summary": {
+            "has_time_restrictions": true,
+            "has_toll": false,
+            "has_highway": false,
+            "has_ferry": false,
+            "min_lat": 21.021474,
+            "min_lon": 105.754697,
+            "max_lat": 21.030663,
+            "max_lon": 105.768075,
+            "time": 332.151,
+            "length": 3.483,
+            "cost": 1029.814
+          },
+          "shape": "eq`bg@smcvhEKnOSxWAx@Q~SUrXSpWAr@HzNWnh@ZpaAJ|Zb@jYOt@eBtIiAdCwChFuEfIaEzJ{]kDcVSeN|BaNbCoRtIyVvKmRvIkVxImFjB_KtAaITgTYqMk@_LuC_NuI{LyIkGqHsEeIqAyJYqBOiEYaCqDuCaMgLgImHwKgM_YyVsVqVcWcXgPmNeOuJeQcLsPkMqP{OoMeL_HsDaIcDw@OcDo@yGZjCiLzYmuAjIca@hAiFhBmI|ZswAxHq^|CwNfAiF|BqKpA_GxCkNhPou@lh@sdChCeLd@wBbHyErEsBXMrC_AfDu@rCa@lThF~OxDv_@rIdJjEv@bDdBhCdC`BfB^hATvDMnBk@vVbIdm@tRvRlGjAh@zSzG~@r@t@PxA^\\?jPtEjCRbAHbnAzKv@FbKt@rOr@P`N"
+        }
+      ],
+      "summary": {
+        "has_time_restrictions": true,
+        "has_toll": false,
+        "has_highway": false,
+        "has_ferry": false,
+        "min_lat": 21.021474,
+        "min_lon": 105.754697,
+        "max_lat": 21.030663,
+        "max_lon": 105.768075,
+        "time": 332.151,
+        "length": 3.483,
+        "cost": 1029.814
+      },
+      "status_message": "Found route between points",
+      "status": 0,
+      "units": "kilometers",
+      "language": "en-US"
+    }
+  }
+}

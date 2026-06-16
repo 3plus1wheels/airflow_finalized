@@ -1,0 +1,17 @@
+{
+  "locations": [
+    {
+      "lat": 21.0214,
+      "lon": 105.761
+    },
+    {
+      "lat": 21.0225,
+      "lon": 105.765
+    }
+  ],
+  "costing": "motor_scooter",
+  "directions_options": {
+    "units": "kilometers",
+    "shape_format": "geojson"
+  }
+}

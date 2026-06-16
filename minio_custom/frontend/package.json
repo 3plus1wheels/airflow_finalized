@@ -1,0 +1,19 @@
+{
+  "name": "minio-s3-wrapper-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-file-icon": "^1.6.0",
+    "typescript": "^5.8.0",
+    "vite": "^7.0.0"
+  }
+}

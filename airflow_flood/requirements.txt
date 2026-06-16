@@ -1,0 +1,16 @@
+requests
+threedidepth
+geopandas
+rasterio==1.4.4
+python-dotenv
+shapely
+boto3
+apache-airflow==3.1.7
+billiard
+fiona
+# for data_manholes
+selenium 
+webdriver-manager 
+pytesseract 
+opencv-python-headless
+numpy 

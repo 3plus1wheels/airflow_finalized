@@ -1,0 +1,1934 @@
+{
+  "locations": [
+    {
+      "lat": 21.0214,
+      "lon": 105.761
+    },
+    {
+      "lat": 21.0225,
+      "lon": 105.765
+    }
+  ],
+  "costing": "motor_scooter",
+  "directions_options": {
+    "units": "kilometers"
+  },
+  "linear_cost_factors": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7386502007213,
+            21.010337786301395
+          ],
+          [
+            105.73855401267542,
+            21.01034443884273
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đại lộ Thăng Long",
+        "depth_m": 4.53,
+        "depth_cm": 453.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73855401267542,
+            21.01034443884273
+          ],
+          [
+            105.73845782461946,
+            21.010351091384763
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đại lộ Thăng Long",
+        "depth_m": 4.2,
+        "depth_cm": 420.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73845782461946,
+            21.010351091384763
+          ],
+          [
+            105.7383616365534,
+            21.010357743927493
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đại lộ Thăng Long",
+        "depth_m": 3.86,
+        "depth_cm": 386.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7629244460756,
+            21.01557933728219
+          ],
+          [
+            105.76282787295472,
+            21.01551064062138
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/781765441",
+        "depth_m": 3.71,
+        "depth_cm": 371.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.75535552467808,
+            20.991587511776505
+          ],
+          [
+            105.7553565,
+            20.9915613
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1451382738",
+        "depth_m": 3.59,
+        "depth_cm": 359.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7383616365534,
+            21.010357743927493
+          ],
+          [
+            105.73826544847728,
+            21.010364396470923
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đại lộ Thăng Long",
+        "depth_m": 3.54,
+        "depth_cm": 354.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76310833043604,
+            21.013896098639716
+          ],
+          [
+            105.76307079169348,
+            21.013869780510575
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1205846269",
+        "depth_m": 3.54,
+        "depth_cm": 354.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7623435780261,
+            21.02308881422245
+          ],
+          [
+            105.7623556,
+            21.0231648
+          ],
+          [
+            105.76235785306038,
+            21.023179100913772
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Phố Đỗ Xuân Hợp",
+        "depth_m": 3.53,
+        "depth_cm": 353.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76235785306038,
+            21.023179100913772
+          ],
+          [
+            105.76237207745739,
+            21.023269387830606
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Phố Đỗ Xuân Hợp",
+        "depth_m": 3.53,
+        "depth_cm": 353.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76237207745739,
+            21.023269387830606
+          ],
+          [
+            105.7623818,
+            21.0233311
+          ],
+          [
+            105.76238630781701,
+            21.023359674719263
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Phố Đỗ Xuân Hợp",
+        "depth_m": 3.53,
+        "depth_cm": 353.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76238630781701,
+            21.023359674719263
+          ],
+          [
+            105.76238666712479,
+            21.023361952344672
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Phố Đỗ Xuân Hợp",
+        "depth_m": 3.53,
+        "depth_cm": 353.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73826544847728,
+            21.010364396470923
+          ],
+          [
+            105.73825343087032,
+            21.01036522763062
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đại lộ Thăng Long",
+        "depth_m": 3.22,
+        "depth_cm": 322.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76320489755706,
+            21.01396380111957
+          ],
+          [
+            105.76319884386686,
+            21.01395955692305
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1205846269",
+        "depth_m": 3.21,
+        "depth_cm": 321.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73882784912026,
+            21.007333438928878
+          ],
+          [
+            105.7389239081756,
+            21.007300985323695
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Văn Lang 2",
+        "depth_m": 3.17,
+        "depth_cm": 317.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7390231,
+            21.0072675
+          ],
+          [
+            105.7390199237437,
+            21.007259710021494
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.14,
+        "depth_cm": 314.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73901996731445,
+            21.007268557330505
+          ],
+          [
+            105.7390231,
+            21.0072675
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Văn Lang 2",
+        "depth_m": 3.14,
+        "depth_cm": 314.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73903211515304,
+            21.007289907318306
+          ],
+          [
+            105.7390231,
+            21.0072675
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.14,
+        "depth_cm": 314.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7623347,
+            21.0230327
+          ],
+          [
+            105.76238498767518,
+            21.02303165776839
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/488397517",
+        "depth_m": 3.12,
+        "depth_cm": 312.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7389954617148,
+            21.00719971527873
+          ],
+          [
+            105.7389588,
+            21.0071098
+          ],
+          [
+            105.73895868916357,
+            21.007109523747307
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.12,
+        "depth_cm": 312.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73873179002182,
+            21.007365892548624
+          ],
+          [
+            105.73882784912026,
+            21.007333438928878
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Văn Lang 2",
+        "depth_m": 3.12,
+        "depth_cm": 312.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74170778931916,
+            21.00745896949025
+          ],
+          [
+            105.74171513011798,
+            21.007478265656324
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 3.12,
+        "depth_cm": 312.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7623347,
+            21.0230327
+          ],
+          [
+            105.76228883056542,
+            21.023045709240836
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/947077266",
+        "depth_m": 3.12,
+        "depth_cm": 312.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7623347,
+            21.0230327
+          ],
+          [
+            105.7623435780261,
+            21.02308881422245
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Phố Đỗ Xuân Hợp",
+        "depth_m": 3.12,
+        "depth_cm": 312.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76233023817467,
+            21.02299852333801
+          ],
+          [
+            105.7623347,
+            21.0230327
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Phố Đỗ Xuân Hợp",
+        "depth_m": 3.12,
+        "depth_cm": 312.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73868480531593,
+            21.0073817663576
+          ],
+          [
+            105.73873179002182,
+            21.007365892548624
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Văn Lang 2",
+        "depth_m": 3.11,
+        "depth_cm": 311.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74167347411446,
+            21.007368767877878
+          ],
+          [
+            105.74170778931916,
+            21.00745896949025
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 3.11,
+        "depth_cm": 311.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73906840281607,
+            21.00738010093044
+          ],
+          [
+            105.73903211515304,
+            21.007289907318306
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.1,
+        "depth_cm": 310.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7390199237437,
+            21.007259710021494
+          ],
+          [
+            105.7389954617148,
+            21.00719971527873
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.09,
+        "depth_cm": 309.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7389557282923,
+            21.007290239007993
+          ],
+          [
+            105.73901996731445,
+            21.007268557330505
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Văn Lang 2",
+        "depth_m": 3.09,
+        "depth_cm": 309.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73888631490995,
+            21.00692913557359
+          ],
+          [
+            105.73885012777777,
+            21.00683894147332
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.06,
+        "depth_cm": 306.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76282787295472,
+            21.01551064062138
+          ],
+          [
+            105.7628090734165,
+            21.015497267692265
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/781765441",
+        "depth_m": 3.04,
+        "depth_cm": 304.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73885012777777,
+            21.00683894147332
+          ],
+          [
+            105.7388266,
+            21.0067803
+          ],
+          [
+            105.73882510750539,
+            21.00677658595812
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.03,
+        "depth_cm": 303.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7388266,
+            21.0067803
+          ],
+          [
+            105.73882512753073,
+            21.006780653392624
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949818",
+        "depth_m": 3.03,
+        "depth_cm": 303.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73895868916357,
+            21.007109523747307
+          ],
+          [
+            105.73892252151941,
+            21.007019378219702
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 3.01,
+        "depth_cm": 301.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73892252151941,
+            21.007019378219702
+          ],
+          [
+            105.73892250204125,
+            21.007019329671635
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.99,
+        "depth_cm": 299.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73892250204125,
+            21.007019329671635
+          ],
+          [
+            105.73888631490995,
+            21.00692913557359
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.94,
+        "depth_cm": 294.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7629427393847,
+            21.013780004003173
+          ],
+          [
+            105.76291519645436,
+            21.01376069386255
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1205846269",
+        "depth_m": 2.87,
+        "depth_cm": 287.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73881392055007,
+            21.006748747451816
+          ],
+          [
+            105.73877767597415,
+            21.00665855357624
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.85,
+        "depth_cm": 285.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7630117634018,
+            21.01382839622071
+          ],
+          [
+            105.7629427393847,
+            21.013780004003173
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1205846269",
+        "depth_m": 2.85,
+        "depth_cm": 285.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73882510750539,
+            21.00677658595812
+          ],
+          [
+            105.73881392055007,
+            21.006748747451816
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.84,
+        "depth_cm": 284.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73863224253452,
+            21.006689638543435
+          ],
+          [
+            105.738690390857,
+            21.006658932449955
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949818",
+        "depth_m": 2.84,
+        "depth_cm": 284.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73882512753073,
+            21.006780653392624
+          ],
+          [
+            105.7387666,
+            21.0067947
+          ],
+          [
+            105.73872901389102,
+            21.006801956480466
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949818",
+        "depth_m": 2.84,
+        "depth_cm": 284.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73872901389102,
+            21.006801956480466
+          ],
+          [
+            105.73863288671386,
+            21.006820515065062
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949818",
+        "depth_m": 2.81,
+        "depth_cm": 281.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7389239081756,
+            21.007300985323695
+          ],
+          [
+            105.7389434,
+            21.0072944
+          ],
+          [
+            105.7389557282923,
+            21.007290239007993
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Văn Lang 2",
+        "depth_m": 2.79,
+        "depth_cm": 279.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76281468693736,
+            21.01369022739863
+          ],
+          [
+            105.7627220628205,
+            21.013625289329248
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1205846269",
+        "depth_m": 2.72,
+        "depth_cm": 272.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73825343087032,
+            21.01036522763062
+          ],
+          [
+            105.73816926039119,
+            21.01037104901504
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đại lộ Thăng Long",
+        "depth_m": 2.66,
+        "depth_cm": 266.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.75338775889435,
+            21.02050854641531
+          ],
+          [
+            105.75336721047509,
+            21.020418286582455
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Ngõ 77 Nhuệ Giang",
+        "depth_m": 2.61,
+        "depth_cm": 261.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73874232443012,
+            21.0065683558219
+          ],
+          [
+            105.73872767614384,
+            21.006530203285976
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.59,
+        "depth_cm": 259.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73877767597415,
+            21.00665855357624
+          ],
+          [
+            105.7387615,
+            21.0066183
+          ],
+          [
+            105.73874232443012,
+            21.0065683558219
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.58,
+        "depth_cm": 258.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73872820601684,
+            21.006637843504457
+          ],
+          [
+            105.7387615,
+            21.0066183
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949818",
+        "depth_m": 2.58,
+        "depth_cm": 258.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.738690390857,
+            21.006658932449955
+          ],
+          [
+            105.7387092,
+            21.006649
+          ],
+          [
+            105.73872820601684,
+            21.006637843504457
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949818",
+        "depth_m": 2.57,
+        "depth_cm": 257.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7393035971891,
+            21.006248250727985
+          ],
+          [
+            105.73928724486466,
+            21.006204584804554
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Âu Lạc",
+        "depth_m": 2.56,
+        "depth_cm": 256.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73816926039119,
+            21.01037104901504
+          ],
+          [
+            105.73807307229507,
+            21.010377701559847
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đại lộ Thăng Long",
+        "depth_m": 2.55,
+        "depth_cm": 255.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73872767614384,
+            21.006530203285976
+          ],
+          [
+            105.73870769269567,
+            21.006478154929628
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.51,
+        "depth_cm": 251.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73870769269567,
+            21.006478154929628
+          ],
+          [
+            105.73867306095727,
+            21.006387954027023
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.49,
+        "depth_cm": 249.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.75550035959834,
+            21.011193037995735
+          ],
+          [
+            105.7555255,
+            21.0111556
+          ],
+          [
+            105.75555485590543,
+            21.011102445116418
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1329398545",
+        "depth_m": 2.49,
+        "depth_cm": 249.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76307079169348,
+            21.013869780510575
+          ],
+          [
+            105.7630117634018,
+            21.01382839622071
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1205846269",
+        "depth_m": 2.48,
+        "depth_cm": 248.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74128778657364,
+            21.00655728775949
+          ],
+          [
+            105.7413115,
+            21.0065677
+          ],
+          [
+            105.74132580486413,
+            21.00657754834877
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 2.43,
+        "depth_cm": 243.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74132580486413,
+            21.00657754834877
+          ],
+          [
+            105.7413635,
+            21.0066035
+          ],
+          [
+            105.74139680160127,
+            21.00664716406762
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 2.42,
+        "depth_cm": 242.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7414226751847,
+            21.00670951294876
+          ],
+          [
+            105.74143326760101,
+            21.006737356379638
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 2.42,
+        "depth_cm": 242.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74139680160127,
+            21.00664716406762
+          ],
+          [
+            105.7414011,
+            21.0066528
+          ],
+          [
+            105.7414226751847,
+            21.00670951294876
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 2.41,
+        "depth_cm": 241.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74143326760101,
+            21.006737356379638
+          ],
+          [
+            105.741467582826,
+            21.006827558045366
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 2.4,
+        "depth_cm": 240.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73867306095727,
+            21.006387954027023
+          ],
+          [
+            105.73863842921803,
+            21.006297753122254
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.36,
+        "depth_cm": 236.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74122936628459,
+            21.006532958550164
+          ],
+          [
+            105.7412327,
+            21.0065331
+          ],
+          [
+            105.74128778657364,
+            21.00655728775949
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/896414892",
+        "depth_m": 2.35,
+        "depth_cm": 235.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74242650106216,
+            21.008901453865985
+          ],
+          [
+            105.74239559392352,
+            21.008879284562145
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949834",
+        "depth_m": 2.32,
+        "depth_cm": 232.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73863842921803,
+            21.006297753122254
+          ],
+          [
+            105.73863020830096,
+            21.006276341140833
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.3,
+        "depth_cm": 230.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74297296704452,
+            21.008890266369605
+          ],
+          [
+            105.74287677733004,
+            21.008896341952052
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949834",
+        "depth_m": 2.3,
+        "depth_cm": 230.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74268439787323,
+            21.008908493118703
+          ],
+          [
+            105.74258820813083,
+            21.008914568702913
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949834",
+        "depth_m": 2.3,
+        "depth_cm": 230.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74278058760628,
+            21.008902417535083
+          ],
+          [
+            105.74268439787323,
+            21.008908493118703
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949834",
+        "depth_m": 2.29,
+        "depth_cm": 229.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74287677733004,
+            21.008896341952052
+          ],
+          [
+            105.74282325634161,
+            21.008899722471263
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949834",
+        "depth_m": 2.24,
+        "depth_cm": 224.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7554931756832,
+            21.011203735970568
+          ],
+          [
+            105.75550035959834,
+            21.011193037995735
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1329398545",
+        "depth_m": 2.24,
+        "depth_cm": 224.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.76281862959378,
+            21.013692991565293
+          ],
+          [
+            105.76281468693736,
+            21.01369022739863
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1205846269",
+        "depth_m": 2.23,
+        "depth_cm": 223.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.7553976659817,
+            21.011345022376624
+          ],
+          [
+            105.755401,
+            21.011341
+          ],
+          [
+            105.75543950563748,
+            21.011283659074792
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1329398545",
+        "depth_m": 2.23,
+        "depth_cm": 223.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73863020830096,
+            21.006276341140833
+          ],
+          [
+            105.73860379747231,
+            21.0062075522006
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.21,
+        "depth_cm": 221.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74258820813083,
+            21.008914568702913
+          ],
+          [
+            105.7425323,
+            21.0089181
+          ],
+          [
+            105.74249201839473,
+            21.008920647453298
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949834",
+        "depth_m": 2.2,
+        "depth_cm": 220.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74255597868799,
+            21.008991240071197
+          ],
+          [
+            105.7425535,
+            21.0089836
+          ],
+          [
+            105.7425323,
+            21.0089181
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949836",
+        "depth_m": 2.2,
+        "depth_cm": 220.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.75537339582623,
+            21.011374303471392
+          ],
+          [
+            105.7553976659817,
+            21.011345022376624
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1329398545",
+        "depth_m": 2.18,
+        "depth_cm": 218.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.73860379747231,
+            21.0062075522006
+          ],
+          [
+            105.7385822,
+            21.0061513
+          ],
+          [
+            105.73856882727425,
+            21.006117352740947
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "Đường Văn Lang",
+        "depth_m": 2.16,
+        "depth_cm": 216.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.75530202423474,
+            21.01146011520782
+          ],
+          [
+            105.7553051,
+            21.0114567
+          ],
+          [
+            105.75537339582623,
+            21.011374303471392
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1329398545",
+        "depth_m": 2.16,
+        "depth_cm": 216.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            105.74249201839473,
+            21.008920647453298
+          ],
+          [
+            105.7424564,
+            21.0089229
+          ],
+          [
+            105.74242650106216,
+            21.008901453865985
+          ]
+        ]
+      },
+      "properties": {
+        "factor": 100,
+        "road_name": "way/1101949834",
+        "depth_m": 2.15,
+        "depth_cm": 215.0,
+        "time": "2026-05-22T19:00:00"
+      }
+    }
+  ]
+}

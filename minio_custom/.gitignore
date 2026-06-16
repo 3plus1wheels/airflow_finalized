@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+db.sqlite3
+.env
+node_modules/
+dist/
+minio-data/
+backend-data/

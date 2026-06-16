@@ -1,0 +1,41 @@
+services:
+  valhalla:
+    image: ghcr.io/valhalla/valhalla:3.6.2
+    container_name: floodmap-valhalla-hanoi
+    command: ["valhalla_service", "/custom_files/valhalla.json", "2"]
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./valhalla/custom_files:/custom_files
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "printf 'GET /status HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >/dev/tcp/127.0.0.1/8002"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  floodmap-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8010
+      VALHALLA_URL: http://valhalla:8002
+    ports:
+      - "8010:8010"
+    depends_on:
+      valhalla:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: floodmap-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - floodmap-backend
+    restart: unless-stopped

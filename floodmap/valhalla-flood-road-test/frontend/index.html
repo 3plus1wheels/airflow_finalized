@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Valhalla Flood Road Test</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIINfQgbWgq0U0K2rEjcwM4Q1xQOVw5+QHk="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <aside class="panel">
+        <h1>Valhalla Flood Road Test</h1>
+        <details class="panel-section" open>
+          <summary>Route Setup</summary>
+          <div class="field">
+            <label for="origin">Origin lat, lon</label>
+            <input id="origin" value="21.0214, 105.7610" />
+          </div>
+          <div class="field">
+            <label for="destination">Destination lat, lon</label>
+            <input id="destination" value="21.0225, 105.7650" />
+          </div>
+          <div class="field">
+            <label for="vehicle">Vehicle</label>
+            <select id="vehicle">
+              <option value="motorbike">Motorbike</option>
+              <option value="car">Car</option>
+              <option value="truck">Truck</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="time-step">Flood time step</label>
+            <select id="time-step"></select>
+          </div>
+          <div class="button-row">
+            <button id="pick-origin" type="button">Pick Start</button>
+            <button id="pick-destination" type="button">Pick End</button>
+            <button id="route" type="button">Route</button>
+          </div>
+        </details>
+        <section id="result" class="result">
+          <div class="badge neutral">READY</div>
+          <p>Backend: http://127.0.0.1:8010</p>
+        </section>
+      </aside>
+      <section id="map"></section>
+    </main>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

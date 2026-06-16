@@ -1,9 +1,0 @@
-.DS_Store
-.vscode
-.env
-data/
-state/
-logs/
-__pycache__/
-config/
-plugins/

@@ -1,0 +1,56 @@
+# OS / editor
+.DS_Store
+.vscode/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+.tox/
+.venv/
+venv/
+ENV/
+env/
+
+# Node
+node_modules/
+.npm/
+.yarn/
+.pnpm-store/
+dist/
+build/
+
+# Logs and temp
+*.log
+*.tmp
+*.swp
+*.swo
+.cache/
+
+# Airflow local state
+airflow_flood/data/
+airflow_flood/state/
+airflow_flood/logs/
+airflow_flood/config/
+airflow_flood/plugins/
+airflow_flood/flood/
+
+# MinIO / Django local state
+db.sqlite3
+minio_custom/minio-data/
+minio_custom/backend-data/
+
+# Large generated Valhalla data
+floodmap/valhalla-flood-road-test/valhalla/custom_files/valhalla_tiles.tar
+floodmap/valhalla-flood-road-test/valhalla/source/vietnam-latest.osm.pbf

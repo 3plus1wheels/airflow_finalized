@@ -19,6 +19,8 @@ x-airflow-common: &airflow-common
     MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-flood-results-full}
     MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
     MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+    AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
+    MAX_WORKERS: ${AIRFLOW_TASK_MAX_WORKERS:-2}
   volumes:
     - ./airflow_flood/dags:/opt/airflow/dags
     - airflow-logs:/opt/airflow/logs

@@ -32,8 +32,8 @@ x-airflow-common: &airflow-common
       condition: service_healthy
     airflow-postgres:
       condition: service_healthy
-    minio:
-      condition: service_started
+    minio-init:
+      condition: service_completed_successfully
 
 services:
   minio:
@@ -48,6 +48,26 @@ services:
     volumes:
       - ${MINIO_DATA_DIR:-./minio_custom/minio-data}:/data
     restart: unless-stopped
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    depends_on:
+      minio:
+        condition: service_started
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-flood-results-full}
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        until mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"; do
+          echo "Waiting for MinIO..."
+          sleep 2
+        done
+        mc mb --ignore-existing "local/$${MINIO_BUCKET_NAME}"
+        echo "MinIO bucket ready: $${MINIO_BUCKET_NAME}"
 
   storage-postgres:
     image: postgres:17-alpine
@@ -282,8 +302,8 @@ services:
     depends_on:
       valhalla:
         condition: service_healthy
-      minio:
-        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
     ports:
       - "${FLOODMAP_BACKEND_PORT:-8010}:8010"
     restart: unless-stopped

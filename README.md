@@ -25,6 +25,12 @@ Local URLs:
 
 ## Data Flow
 
+On startup, the `minio-init` service creates the configured bucket if it does not already exist. The default bucket is:
+
+```text
+flood-results-full
+```
+
 Airflow uploads generated road-flood GeoJSON objects to the shared MinIO service:
 
 ```text

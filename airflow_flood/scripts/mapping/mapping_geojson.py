@@ -11,6 +11,16 @@ import geopandas as gpd
 from shapely.geometry import mapping
 
 
+def write_empty_output(out_path: str, verbose: bool = True) -> str:
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    output = {"type": "FeatureCollection", "features": []}
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2, allow_nan=False)
+    if verbose:
+        print(f"Empty road flood GeoJSON saved: {out_path}")
+    return out_path
+
+
 def build_road_flood_timeseries_geojson(
     road_path: str,
     flood_path: str,
@@ -39,6 +49,9 @@ def build_road_flood_timeseries_geojson(
     # ==============================
     roads = gpd.read_file(road_path)
     flood = gpd.read_file(flood_path)
+
+    if flood.empty:
+        return write_empty_output(out_path, verbose=verbose)
 
     roads = roads.to_crs(epsg=target_epsg)
     flood = flood.to_crs(epsg=target_epsg)

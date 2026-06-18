@@ -1,9 +1,8 @@
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.providers.standard.operators.python import PythonOperator
 from datetime import datetime, timedelta
-import sys
 import os
-import pandas as pd
+import sys
 
 
 BASE_PATH = "/opt/airflow"
@@ -12,62 +11,71 @@ DATA_PATH = os.path.join(BASE_PATH, "data/mapping")
 
 sys.path.append(SCRIPTS_PATH)
 
-try:
-    import create_simulation
-    import download_result
-    import calculate_depth
-    import mapping.extract_geojson_full
-    import mapping.merge_geojson
-    import mapping.mapping_geojson
-    import mapping.upload_minio
-except ImportError as e:
-    print(f"❌ Lỗi Import: {e}")
-
-
 STATE_FILE = os.path.join(BASE_PATH, "state", "flood_system_state.json")
 INPUT_DEM = os.path.join(DATA_PATH, "inputs", "dem.tif")
 INPUT_GRID = os.path.join(DATA_PATH, "inputs", "gridadmin.h5")
 RESULT_DIR = os.path.join(DATA_PATH, "results")
+FIXTURE_RESULT_NC = os.path.join(RESULT_DIR, "results_3di.nc")
 DEPTH_ROOT_DIR = os.path.join(DATA_PATH, "output_depths")
 ROADS_GEOJSON_PATH = os.path.join(DATA_PATH, "inputs", "toa-do-duong-hanoi.geojson")
 GEOJSON_ROOT_DIR = os.path.join(DATA_PATH, "output_geojsons")
 FINAL_OUTPUT_ROOT_DIR = os.path.join(DATA_PATH, "output_final")
+LOCAL_GEOJSON_ROOT_DIR = os.getenv(
+    "LOCAL_GEOJSON_DIR", os.path.join(BASE_PATH, "local_geojson")
+)
+FLOOD_MAPPING_SCHEDULE = os.getenv("FLOOD_MAPPING_SCHEDULE")
+if FLOOD_MAPPING_SCHEDULE and FLOOD_MAPPING_SCHEDULE.lower() in {"none", "null", "manual"}:
+    FLOOD_MAPPING_SCHEDULE = None
+USE_DOWNLOADED_RESULTS = os.getenv("FLOOD_USE_DOWNLOADED_RESULTS", "true").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+
+
+def require_file(path, label):
+    if not path or not os.path.exists(path):
+        raise FileNotFoundError(f"Missing {label}: {path}")
+    return path
 
 
 def task_run_simulation(**kwargs):
+    import create_simulation
+
     ti = kwargs["ti"]
-    print("🚀 1. Trigger Simulation...")
+    print("1. Trigger Simulation...")
     sim_id, _ = create_simulation.run_forecast_process(state_file_path=STATE_FILE)
     if not sim_id:
-        raise ValueError("❌ Failed to create simulation")
+        raise ValueError("Failed to create simulation")
     ti.xcom_push(key="sim_id", value=sim_id)
 
 
 def task_download_result(**kwargs):
+    import download_result
+
     ti = kwargs["ti"]
     sim_id = ti.xcom_pull(task_ids="1_trigger_simulation", key="sim_id")
-    print(f"⬇️ 2. Download results for Sim {sim_id}...")
+    print(f"2. Download results for Sim {sim_id}...")
     saved_path = download_result.run_download(sim_id, output_dir=RESULT_DIR)
     if not saved_path:
-        raise ValueError("❌ Download failed")
+        raise ValueError("Download failed")
     ti.xcom_push(key="nc_path", value=saved_path)
 
 
 def task_calculate_depth(**kwargs):
-    """
-    Task này sẽ trả về đường dẫn thư mục UUID vừa tạo.
-    Ví dụ return: /opt/airflow/data/mapping/output_depths/a1b2c3d4
-    """
+    import calculate_depth
+
     ti = kwargs["ti"]
-    # nc_path = ti.xcom_pull(task_ids="2_download_results", key="nc_path")
-    nc_path = "/opt/airflow/data/mapping/results/results_3di.nc"
+    nc_path = ti.xcom_pull(task_ids="2_download_results", key="nc_path")
+    if not USE_DOWNLOADED_RESULTS:
+        print(f"Using fixture NetCDF for test mapping: {FIXTURE_RESULT_NC}")
+        nc_path = FIXTURE_RESULT_NC
 
-    print("⚙️ 3. Calculating Depth...")
-
+    print("3. Calculating Depth...")
     output_uuid_dir = calculate_depth.run_calculate_depth(
-        grid_path=INPUT_GRID,
-        nc_path=nc_path,
-        dem_path=INPUT_DEM,
+        grid_path=require_file(INPUT_GRID, "3Di grid admin file"),
+        nc_path=require_file(nc_path, "downloaded 3Di result NetCDF"),
+        dem_path=require_file(INPUT_DEM, "DEM raster"),
         output_dir=DEPTH_ROOT_DIR,
     )
 
@@ -75,15 +83,12 @@ def task_calculate_depth(**kwargs):
 
 
 def task_extract_geojson_full(**kwargs):
-    """
-    Nhận đường dẫn Depth từ Task 3 -> Tạo đường dẫn GeoJSON tương ứng -> Chạy convert
-    """
-    ti = kwargs["ti"]
+    import mapping.extract_geojson_full
 
+    ti = kwargs["ti"]
     input_depth_dir = ti.xcom_pull(task_ids="3_calculate_depth")
 
-    print(f"🗺️ 4. Extracting GeoJSON from: {input_depth_dir}")
-
+    print(f"4. Extracting GeoJSON from: {input_depth_dir}")
     current_uuid = os.path.basename(str(input_depth_dir))
     output_geojson_dir = os.path.join(GEOJSON_ROOT_DIR, current_uuid)
 
@@ -95,92 +100,83 @@ def task_extract_geojson_full(**kwargs):
 
 
 def task_merge_geojson(**kwargs):
+    import mapping.merge_geojson
+
     ti = kwargs["ti"]
     input_geojson_dir = ti.xcom_pull(task_ids="4_extract_geojson_full")
 
-    run_ts = kwargs.get("ts_nodash") or pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+    run_ts = kwargs.get("ts_nodash") or datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     ti.xcom_push(key="run_ts", value=run_ts)
 
-    # run_merge nên return merged_path (string) như cũ
     merged_path = mapping.merge_geojson.run_merge(
         geojson_dir=input_geojson_dir,
         output_dir=FINAL_OUTPUT_ROOT_DIR,
         run_ts=run_ts,
-        # ✅ quan trọng: đảm bảo run_merge return STRING PATH, không return dict
     )
 
     if not merged_path:
-        raise ValueError("❌ Merge failed.")
+        raise ValueError("Merge failed.")
 
     return merged_path
 
 
 def task_mapping_geojson(**kwargs):
-    """
-    Nhận merged flood GeoJSON từ task 5
-    -> Mapping với roads
-    -> Xuất road_flood_timeseries_generated.geojson
-    -> Return đường dẫn file mapping (để upload)
-    """
+    import mapping.mapping_geojson
 
     ti = kwargs["ti"]
-
-    # Lấy file merged từ XCom
     merged_flood_file = ti.xcom_pull(task_ids="5_merge_geojson")
+    run_ts = ti.xcom_pull(task_ids="5_merge_geojson", key="run_ts")
+    if not run_ts:
+        run_ts = kwargs.get("ts_nodash") or datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
     if not merged_flood_file or not os.path.exists(merged_flood_file):
-        raise ValueError(f"❌ Không tìm thấy merged flood file: {merged_flood_file}")
+        raise ValueError(f"Missing merged flood file: {merged_flood_file}")
 
-    print(f"🗺️ 6. Mapping flood -> roads")
+    print("6. Mapping flood -> roads")
     print(f"   Input flood: {merged_flood_file}")
 
-    # Output mapping file
-    mapping_output_dir = os.path.dirname(merged_flood_file)
+    mapping_output_dir = os.path.join(LOCAL_GEOJSON_ROOT_DIR, run_ts)
     mapping_output_file = os.path.join(
         mapping_output_dir,
-        "road_flood_timeseries_generated.geojson"
+        f"flood_road_{run_ts}.geojson",
     )
 
     print(f"   Output mapping: {mapping_output_file}")
-
-    # Gọi hàm mapping bạn đã viết
     out_path = mapping.mapping_geojson.build_road_flood_timeseries_geojson(
-        road_path=ROADS_GEOJSON_PATH,   
+        road_path=require_file(ROADS_GEOJSON_PATH, "roads GeoJSON"),
         flood_path=merged_flood_file,
         out_path=mapping_output_file,
     )
 
-    print(f"✅ Mapping done: {out_path}")
-
+    print(f"Mapping done: {out_path}")
     return out_path
 
 
 def task_upload_minio(**kwargs):
+    import mapping.upload_minio
+
     ti = kwargs["ti"]
-
     mapping_file = ti.xcom_pull(task_ids="6_mapping_geojson")
-    geojson_dir = ti.xcom_pull(task_ids="4_extract_geojson_full")  # nếu muốn dọn sau upload
+    geojson_dir = ti.xcom_pull(task_ids="4_extract_geojson_full")
 
-    # lấy lại run_ts đã tạo ở task_merge_geojson
     run_ts = ti.xcom_pull(task_ids="5_merge_geojson", key="run_ts")
     if not run_ts:
-        # fallback (ít khi cần)
-        run_ts = kwargs.get("ts_nodash") or pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+        run_ts = kwargs.get("ts_nodash") or datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
     result = mapping.upload_minio.run_upload(
-        file_path=mapping_file,
+        file_path=require_file(mapping_file, "mapped flood road GeoJSON"),
         geojson_dir_to_clean=geojson_dir,
         tif_dir_to_clean=None,
-        delete_local_file_after_upload=True,
-        run_ts=run_ts,  # ✅ prefix chung
+        delete_local_file_after_upload=False,
+        run_ts=run_ts,
     )
 
     if not result:
-        raise ValueError("❌ Upload MinIO failed")
+        raise ValueError("Upload MinIO failed")
 
     return result
-    
-    
+
+
 default_args = {
     "owner": "flood_team",
     "depends_on_past": False,
@@ -193,9 +189,10 @@ with DAG(
     "flood_mapping_full",
     default_args=default_args,
     description="Pipeline 3Di -> MinIO (Direct Path Passing)",
-    schedule="*/30 * * * *",
+    schedule=FLOOD_MAPPING_SCHEDULE,
     start_date=datetime(2026, 2, 5),
     catchup=False,
+    is_paused_upon_creation=False,
     max_active_runs=1,
     tags=["3di", "flood"],
 ) as dag:

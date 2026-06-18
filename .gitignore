@@ -37,6 +37,7 @@ build/
 *.swp
 *.swo
 .cache/
+local_geojson/
 
 # Airflow local state
 airflow_flood/data/

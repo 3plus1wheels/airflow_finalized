@@ -9,18 +9,32 @@ x-airflow-common: &airflow-common
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@airflow-postgres/airflow
     AIRFLOW__CELERY__BROKER_URL: redis://:@airflow-redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: 'http://airflow-apiserver:8080/execution/'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+    AIRFLOW__SCHEDULER__TASK_INSTANCE_HEARTBEAT_TIMEOUT: ${AIRFLOW_TASK_HEARTBEAT_TIMEOUT:-1800}
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     MINIO_ENDPOINT: http://minio:9000
     MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME:-flood-results-full}
     MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
     MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
-    AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-2}
-    MAX_WORKERS: ${AIRFLOW_TASK_MAX_WORKERS:-2}
+    AIRFLOW__CELERY__WORKER_CONCURRENCY: ${AIRFLOW_WORKER_CONCURRENCY:-1}
+    MAX_WORKERS: ${MAX_WORKERS:-1}
+    SAMPLE_RATE: ${SAMPLE_RATE:-20}
+    MIN_DEPTH_THRESHOLD: ${MIN_DEPTH_THRESHOLD:-0.05}
+    FLOOD_MAPPING_SCHEDULE: ${FLOOD_MAPPING_SCHEDULE:-*/30 * * * *}
+    FLOOD_USE_DOWNLOADED_RESULTS: ${FLOOD_USE_DOWNLOADED_RESULTS:-true}
+    LOCAL_GEOJSON_DIR: /opt/airflow/local_geojson
+    SIMULATION_DURATION: ${SIMULATION_DURATION:-600}
+    UPDATE_INTERVAL: ${UPDATE_INTERVAL:-900}
+    FLOOD_TEST_RAIN_MM_HR: ${FLOOD_TEST_RAIN_MM_HR:-}
+    TOMORROW_API_KEY: ${TOMORROW_API_KEY:?Set TOMORROW_API_KEY in .env}
+    THREEDI_API_KEY: ${THREEDI_API_KEY:?Set THREEDI_API_KEY in .env}
+    MODEL_ID: ${MODEL_ID:-76591}
+    THREEDI_MODEL_ID: ${THREEDI_MODEL_ID:-${MODEL_ID:-76591}}
+    ORG_UUID: ${ORG_UUID:?Set ORG_UUID in .env}
   volumes:
     - ./airflow_flood/dags:/opt/airflow/dags
     - airflow-logs:/opt/airflow/logs
@@ -28,6 +42,7 @@ x-airflow-common: &airflow-common
     - ./airflow_flood/plugins:/opt/airflow/plugins
     - ./airflow_flood/scripts:/opt/airflow/scripts
     - ./airflow_flood/data:/opt/airflow/data
+    - ./local_geojson:/opt/airflow/local_geojson
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     airflow-redis:
@@ -48,7 +63,7 @@ services:
       - "127.0.0.1:${MINIO_API_PORT:-9000}:9000"
       - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
-      - ${MINIO_DATA_DIR:-./minio_custom/minio-data}:/data
+      - minio-data:/data
     restart: unless-stopped
 
   minio-init:
@@ -235,21 +250,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  airflow-triggerer:
-    <<: *airflow-common
-    command: triggerer
-    healthcheck:
-      test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
-    depends_on:
-      <<: *airflow-common-depends-on
-      airflow-init:
-        condition: service_completed_successfully
-
   airflow-init:
     <<: *airflow-common
     entrypoint: /bin/bash
@@ -261,9 +261,8 @@ services:
         fi
         mkdir -v -p /opt/airflow/{logs,dags,scripts,plugins,config}
         /entrypoint airflow version
-        /entrypoint airflow config list >/dev/null
-        chown -R "${AIRFLOW_UID}:0" /opt/airflow/
-        chown -v -R "${AIRFLOW_UID}:0" /opt/airflow/{logs,dags,scripts,plugins,config}
+        mkdir -v -p /opt/airflow/{data,state}
+        chown -v -R "${AIRFLOW_UID}:0" /opt/airflow/{logs,dags,scripts,plugins,config,data,state}
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
@@ -272,6 +271,24 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
+
+  airflow-trigger-flood-mapping:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        /entrypoint airflow dags unpause flood_mapping_full || true
+        /entrypoint airflow dags trigger --run-id "startup__$$(date -u +%Y%m%dT%H%M%SZ)" flood_mapping_full || true
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-apiserver:
+        condition: service_healthy
+      airflow-scheduler:
+        condition: service_started
+      airflow-worker:
+        condition: service_started
+    restart: "no"
 
   valhalla:
     image: ghcr.io/valhalla/valhalla:3.6.2
@@ -323,4 +340,5 @@ services:
 volumes:
   airflow-postgres-data:
   airflow-logs:
+  minio-data:
   storage-postgres-data:

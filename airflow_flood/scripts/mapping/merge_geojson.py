@@ -19,6 +19,16 @@ if not hasattr(pd, "Float64Index"):
 import geopandas as gpd
 
 
+def write_empty_geojson(output_file: str) -> bool:
+    out_dir = os.path.dirname(output_file)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    with open(output_file, "w", encoding="utf-8") as geojson_file:
+        json.dump({"type": "FeatureCollection", "features": []}, geojson_file)
+    print(f"Empty merged GeoJSON created: {output_file}")
+    return True
+
+
 def merge_geojsons(input_dir: str, output_file: str) -> bool:
     print(f"Reading GeoJSON files from: {input_dir}")
 
@@ -28,8 +38,8 @@ def merge_geojsons(input_dir: str, output_file: str) -> bool:
 
     files = sorted(glob.glob(os.path.join(input_dir, "depth_*.geojson")))
     if not files:
-        print("No depth_*.geojson files found.")
-        return False
+        print("No depth_*.geojson files found. Writing empty merged GeoJSON.")
+        return write_empty_geojson(output_file)
 
     all_dfs = []
     print(f"Found {len(files)} GeoJSON files. Processing...")
@@ -51,7 +61,7 @@ def merge_geojsons(input_dir: str, output_file: str) -> bool:
                 data = json.load(geojson_file)
 
             if not data.get("features"):
-                print(f"File {filename} has no features, skipping.")
+                print(f"File {filename} has no features, treating as empty flood result.")
                 continue
 
             gdf = gpd.GeoDataFrame.from_features(data["features"])
@@ -69,8 +79,8 @@ def merge_geojsons(input_dir: str, output_file: str) -> bool:
             print(f"Error reading {path}: {exc}")
 
     if not all_dfs:
-        print("No valid GeoJSON dataframes to merge.")
-        return False
+        print("No valid GeoJSON dataframes to merge. Writing empty merged GeoJSON.")
+        return write_empty_geojson(output_file)
 
     print(f"Merging {len(all_dfs)} dataframes...")
     master_df = pd.concat(all_dfs, ignore_index=True)

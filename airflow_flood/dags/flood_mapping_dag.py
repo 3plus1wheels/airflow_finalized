@@ -21,12 +21,17 @@ ROADS_GEOJSON_PATH = os.path.join(DATA_PATH, "inputs", "toa-do-duong-hanoi.geojs
 GEOJSON_ROOT_DIR = os.path.join(DATA_PATH, "output_geojsons")
 FINAL_OUTPUT_ROOT_DIR = os.path.join(DATA_PATH, "output_final")
 LOCAL_GEOJSON_ROOT_DIR = os.getenv(
-    "LOCAL_GEOJSON_DIR", os.path.join(BASE_PATH, "local_geojson")
+    "LOCAL_GEOJSON_DIR", os.path.join(DATA_PATH, "output_road_geojson")
 )
 FLOOD_MAPPING_SCHEDULE = os.getenv("FLOOD_MAPPING_SCHEDULE")
 if FLOOD_MAPPING_SCHEDULE and FLOOD_MAPPING_SCHEDULE.lower() in {"none", "null", "manual"}:
     FLOOD_MAPPING_SCHEDULE = None
 USE_DOWNLOADED_RESULTS = os.getenv("FLOOD_USE_DOWNLOADED_RESULTS", "true").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+KEEP_LOCAL_GEOJSON = os.getenv("KEEP_LOCAL_GEOJSON", "false").lower() in {
     "1",
     "true",
     "yes",
@@ -167,7 +172,7 @@ def task_upload_minio(**kwargs):
         file_path=require_file(mapping_file, "mapped flood road GeoJSON"),
         geojson_dir_to_clean=geojson_dir,
         tif_dir_to_clean=None,
-        delete_local_file_after_upload=False,
+        delete_local_file_after_upload=not KEEP_LOCAL_GEOJSON,
         run_ts=run_ts,
     )
 

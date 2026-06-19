@@ -27,10 +27,11 @@ const layers = {
     onEachFeature: (feature, layer) => {
       const p = feature.properties || {};
       layer.bindPopup(
-        `<strong>Flood area:</strong> ${escapeHtml(p.road_name || "Unknown")}<br>` +
-          `<strong>Time:</strong> ${escapeHtml(p.time || "")}<br>` +
-          `<strong>Depth:</strong> ${formatDepth(p)}<br>` +
-          `<strong>Risk factor:</strong> ${p.factor || 1}`,
+        renderFloodPopup("Flood area", [
+          ["Road", p.road_name || "Unknown"],
+          ["Time", formatTimestamp(p.time || "")],
+          ["Depth", formatDepth(p)],
+        ]),
       );
     },
   }).addTo(map),
@@ -40,11 +41,12 @@ const layers = {
     onEachFeature: (feature, layer) => {
       const p = feature.properties || {};
       layer.bindPopup(
-        `<strong>Road:</strong> ${escapeHtml(p.road_name || "Unknown")}<br>` +
-          `<strong>Time:</strong> ${escapeHtml(p.time || "")}<br>` +
-          `<strong>Depth:</strong> ${formatDepth(p)}<br>` +
-          `<strong>Factor:</strong> ${p.factor || 1}<br>` +
-          `<strong>Vehicle:</strong> ${document.getElementById("vehicle").value}`,
+        renderFloodPopup("Flooded road", [
+          ["Road", p.road_name || "Unknown"],
+          ["Time", formatTimestamp(p.time || "")],
+          ["Depth", formatDepth(p)],
+          ["Vehicle", document.getElementById("vehicle").value],
+        ]),
       );
     },
   }).addTo(map),
@@ -115,6 +117,24 @@ function depthCm(props) {
 function formatDepth(propsOrMeters) {
   const meters = typeof propsOrMeters === "number" ? propsOrMeters : depthM(propsOrMeters || {});
   return `${meters.toFixed(2)} m (${Math.round(meters * 100)} cm)`;
+}
+
+function renderFloodPopup(title, rows) {
+  return `
+    <section class="flood-popup">
+      <h2>${escapeHtml(title)}</h2>
+      <dl>
+        ${rows
+          .map(([label, value]) => `
+            <div>
+              <dt>${escapeHtml(label)}</dt>
+              <dd>${escapeHtml(value || "n/a")}</dd>
+            </div>
+          `)
+          .join("")}
+      </dl>
+    </section>
+  `;
 }
 
 function parsePoint(value) {

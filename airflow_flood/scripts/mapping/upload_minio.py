@@ -1,5 +1,6 @@
 import os
 import shutil
+import json
 
 import boto3
 import pandas as pd
@@ -122,10 +123,28 @@ def run_upload(
         print(f"Local GeoJSON does not exist: {file_path}")
         return None
 
-    print(f"Local GeoJSON ready: {file_path} ({os.path.getsize(file_path)} bytes)")
+    file_size = os.path.getsize(file_path)
+    print(f"Local GeoJSON ready: {file_path} ({file_size} bytes)")
 
     if not run_ts:
         run_ts = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+
+    try:
+        with open(file_path, "r", encoding="utf-8") as geojson_file:
+            feature_count = len(json.load(geojson_file).get("features", []))
+    except Exception as exc:
+        print(f"Local GeoJSON validation failed: {exc}")
+        return None
+
+    if feature_count == 0:
+        print("Local GeoJSON has 0 features. Skipping MinIO upload so last non-empty flood layer stays active.")
+        return {
+            "bucket": BUCKET_NAME,
+            "object_name": None,
+            "run_ts": run_ts,
+            "local_path": file_path,
+            "skipped_empty": True,
+        }
 
     object_name = f"{run_ts}/flood_road_{run_ts}.geojson"
     ok = upload_to_minio(file_path, object_name, run_ts)

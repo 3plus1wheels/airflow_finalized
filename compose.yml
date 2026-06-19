@@ -27,7 +27,8 @@ x-airflow-common: &airflow-common
     MIN_DEPTH_THRESHOLD: ${MIN_DEPTH_THRESHOLD:-0.05}
     FLOOD_MAPPING_SCHEDULE: ${FLOOD_MAPPING_SCHEDULE:-*/30 * * * *}
     FLOOD_USE_DOWNLOADED_RESULTS: ${FLOOD_USE_DOWNLOADED_RESULTS:-true}
-    LOCAL_GEOJSON_DIR: /opt/airflow/local_geojson
+    LOCAL_GEOJSON_DIR: ${LOCAL_GEOJSON_DIR:-/opt/airflow/data/mapping/output_road_geojson}
+    KEEP_LOCAL_GEOJSON: ${KEEP_LOCAL_GEOJSON:-false}
     SIMULATION_DURATION: ${SIMULATION_DURATION:-600}
     UPDATE_INTERVAL: ${UPDATE_INTERVAL:-900}
     FLOOD_TEST_RAIN_MM_HR: ${FLOOD_TEST_RAIN_MM_HR:-}
@@ -43,7 +44,6 @@ x-airflow-common: &airflow-common
     - ./airflow_flood/plugins:/opt/airflow/plugins
     - ./airflow_flood/scripts:/opt/airflow/scripts
     - ./airflow_flood/data:/opt/airflow/data
-    - ./local_geojson:/opt/airflow/local_geojson
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     airflow-redis:

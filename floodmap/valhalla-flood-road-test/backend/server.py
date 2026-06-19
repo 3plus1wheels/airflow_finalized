@@ -100,14 +100,23 @@ class FloodConstraintAdapter:
         if not candidates:
             raise RuntimeError(f"no timestamped flood_road_*.geojson objects found in s3://{bucket}/{prefix}")
 
-        latest = max(candidates, key=lambda item: item["LastModified"])
-        key = latest["Key"]
-        response = client.get_object(Bucket=bucket, Key=key)
-        body = response["Body"].read().decode("utf-8")
-        source = f"s3://{bucket}/{key}"
-        modified = latest["LastModified"].isoformat()
-        print(f"Loaded flood GeoJSON from {source}")
-        return json.loads(body), source, modified
+        for latest in sorted(candidates, key=lambda item: item["LastModified"], reverse=True):
+            key = latest["Key"]
+            if latest.get("Size", 0) <= 100:
+                print(f"Skipping empty-looking flood GeoJSON: s3://{bucket}/{key}")
+                continue
+            response = client.get_object(Bucket=bucket, Key=key)
+            body = response["Body"].read().decode("utf-8")
+            geojson = json.loads(body)
+            if not geojson.get("features"):
+                print(f"Skipping empty flood GeoJSON: s3://{bucket}/{key}")
+                continue
+            source = f"s3://{bucket}/{key}"
+            modified = latest["LastModified"].isoformat()
+            print(f"Loaded flood GeoJSON from {source}")
+            return geojson, source, modified
+
+        raise RuntimeError(f"no non-empty flood_road_*.geojson objects found in s3://{bucket}/{prefix}")
 
     def _load_fallback_geojson(self) -> tuple[dict, str, str]:
         fallback = os.environ.get("FLOOD_LOCAL_FALLBACK", str(DATA_FILE))

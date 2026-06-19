@@ -379,7 +379,8 @@ select {
   grid-column: 1 / -1;
 }
 
-#pick-route-pins.active {
+#pick-route-pins.active,
+#rain-source.active {
   background: #1b66d2;
   border-color: #1b66d2;
   color: #ffffff;

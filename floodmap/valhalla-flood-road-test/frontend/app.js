@@ -76,6 +76,7 @@ let pickRouteStep = null;
 let currentFloodTime = "";
 let currentFloodSource = "";
 let currentFloodLoadedAt = "";
+let floodSourceMode = "latest";
 
 function floodRoadStyle(depthCm) {
   let color = "#d9822b";
@@ -369,7 +370,8 @@ async function getJson(path, options) {
 }
 
 async function loadTimesteps() {
-  const data = await getJson("/flood/timesteps");
+  const modeQuery = floodSourceMode === "rain" ? "?mode=nonempty" : "";
+  const data = await getJson(`/flood/timesteps${modeQuery}`);
   currentFloodTime = data.latest_timestep || data.timesteps?.[data.timesteps.length - 1] || "";
   updateFloodSourceInfo(data);
 }
@@ -387,6 +389,7 @@ function updateFloodSourceInfo(data) {
   el.innerHTML = `
     <strong>Water level source</strong>
     <span title="${escapeHtml(source)}">${escapeHtml(fileName)}</span>
+    <small>${floodSourceMode === "rain" ? "Latest rain/non-empty file" : "Latest available file"}</small>
     <small title="${escapeHtml(title)}">Pulled ${escapeHtml(formatTimestamp(loadedAt))}</small>
     <small>Latest flood time ${escapeHtml(formatTimestamp(data.latest_timestep || currentFloodTime))}</small>
   `;
@@ -409,7 +412,8 @@ async function loadFloodLayers() {
   const time = currentFloodTime;
   const vehicle = document.getElementById("vehicle").value;
   document.getElementById("result").innerHTML = `<div class="badge neutral">LOADING</div><p>Flood time: ${escapeHtml(time || "n/a")}</p>`;
-  const query = `time=${encodeURIComponent(time)}&vehicle_type=${encodeURIComponent(vehicle)}`;
+  const sourceMode = floodSourceMode === "rain" ? "nonempty" : "latest";
+  const query = `time=${encodeURIComponent(time)}&vehicle_type=${encodeURIComponent(vehicle)}&mode=${encodeURIComponent(sourceMode)}`;
   const [polygons, roads] = await Promise.all([
     getJson(`/flood/polygons?${query}`),
     getJson(`/flood/roads?${query}`),
@@ -465,6 +469,7 @@ async function runCompare() {
     destination,
     vehicle_type: vehicle,
     flood_time_step: floodTime,
+    flood_source_mode: floodSourceMode === "rain" ? "nonempty" : "latest",
   };
   const data = await getJson("/route/compare", {
     method: "POST",
@@ -607,6 +612,17 @@ document.getElementById("route").addEventListener("click", () => {
   runCompare().catch((error) => {
     document.getElementById("result").innerHTML = `<div class="badge fail">ERROR</div><p>${escapeHtml(error.message)}</p>`;
   });
+});
+document.getElementById("rain-source").addEventListener("click", () => {
+  floodSourceMode = floodSourceMode === "rain" ? "latest" : "rain";
+  const button = document.getElementById("rain-source");
+  button.classList.toggle("active", floodSourceMode === "rain");
+  button.textContent = floodSourceMode === "rain" ? "Latest File" : "Latest Rain File";
+  loadTimesteps()
+    .then(loadFloodLayers)
+    .catch((error) => {
+      document.getElementById("result").innerHTML = `<div class="badge fail">ERROR</div><p>${escapeHtml(error.message)}</p>`;
+    });
 });
 
 loadTimesteps()

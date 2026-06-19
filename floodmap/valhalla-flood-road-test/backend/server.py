@@ -56,22 +56,27 @@ class FloodConstraintAdapter:
         self._refresh_interval = int(os.environ.get("FLOOD_REFRESH_SECONDS", "30"))
         self.refresh_geojson(force=True)
 
-    def refresh_geojson(self, force: bool = False) -> None:
+    def refresh_geojson(self, force: bool = False, require_features: bool = False) -> None:
         now = time.monotonic()
         if not force and now - self._last_refresh < self._refresh_interval:
             return
         self._last_refresh = now
         try:
-            geojson, source, last_modified = self._load_latest_minio_geojson()
+            geojson, source, last_modified = self._load_latest_minio_geojson(require_features=require_features)
         except Exception as exc:
             print(f"MinIO flood GeoJSON load skipped: {exc}")
-            geojson, source, last_modified = self._load_fallback_geojson()
+            if require_features:
+                geojson = {"type": "FeatureCollection", "features": []}
+                source = f"no non-empty MinIO flood GeoJSON ({exc})"
+                last_modified = ""
+            else:
+                geojson, source, last_modified = self._load_fallback_geojson()
         self.geojson = geojson
         self.geojson_source = source
         self.geojson_source_last_modified = last_modified
         self.geojson_loaded_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
-    def _load_latest_minio_geojson(self) -> tuple[dict, str, str]:
+    def _load_latest_minio_geojson(self, require_features: bool = False) -> tuple[dict, str, str]:
         bucket = os.environ.get("FLOOD_MINIO_BUCKET")
         endpoint = os.environ.get("FLOOD_MINIO_ENDPOINT")
         access_key = os.environ.get("FLOOD_MINIO_ACCESS_KEY")
@@ -102,18 +107,16 @@ class FloodConstraintAdapter:
 
         for latest in sorted(candidates, key=lambda item: item["LastModified"], reverse=True):
             key = latest["Key"]
-            if latest.get("Size", 0) <= 100:
-                print(f"Skipping empty-looking flood GeoJSON: s3://{bucket}/{key}")
-                continue
             response = client.get_object(Bucket=bucket, Key=key)
             body = response["Body"].read().decode("utf-8")
             geojson = json.loads(body)
-            if not geojson.get("features"):
-                print(f"Skipping empty flood GeoJSON: s3://{bucket}/{key}")
+            if require_features and not geojson.get("features"):
+                print(f"Skipping empty flood GeoJSON for rain mode: s3://{bucket}/{key}")
                 continue
             source = f"s3://{bucket}/{key}"
             modified = latest["LastModified"].isoformat()
-            print(f"Loaded flood GeoJSON from {source}")
+            mode = "latest non-empty" if require_features else "latest"
+            print(f"Loaded {mode} flood GeoJSON from {source}")
             return geojson, source, modified
 
         raise RuntimeError(f"no non-empty flood_road_*.geojson objects found in s3://{bucket}/{prefix}")
@@ -138,6 +141,8 @@ class FloodConstraintAdapter:
 
     def roads(self, time_step: str, vehicle_type: str = "motorbike") -> dict:
         self.refresh_geojson()
+        if not time_step:
+            return {"type": "FeatureCollection", "features": []}
         features = build_flood_features(self.geojson, time_step, vehicle_type, include_factor_one=True)
         return {
             "type": "FeatureCollection",
@@ -146,6 +151,8 @@ class FloodConstraintAdapter:
 
     def polygons(self, time_step: str, vehicle_type: str = "motorbike") -> dict:
         self.refresh_geojson()
+        if not time_step:
+            return {"type": "FeatureCollection", "features": []}
         features = build_flood_features(self.geojson, time_step, vehicle_type, include_factor_one=True)
         return {
             "type": "FeatureCollection",
@@ -173,11 +180,14 @@ class FloodConstraintAdapter:
         flood_time_step: str,
         vehicle_type: str = "motorbike",
         costing: str = DEFAULT_COSTING,
+        require_features: bool = False,
     ) -> dict:
-        self.refresh_geojson()
+        self.refresh_geojson(force=True, require_features=require_features)
         baseline = self.baseline(origin, destination, costing)
         summary = route_summary(baseline)
-        all_flood = build_flood_features(self.geojson, flood_time_step, vehicle_type)
+        if not flood_time_step:
+            flood_time_step = ""
+        all_flood = build_flood_features(self.geojson, flood_time_step, vehicle_type) if flood_time_step else []
         selected = top_deepest_features(all_flood, MAX_ROUTE_CONSTRAINTS)
         if summary.get("ok"):
             route_shape = decode_polyline(summary.get("shape"))
@@ -205,16 +215,18 @@ class FloodConstraintAdapter:
         return response
 
     def compare(self, body: dict) -> dict:
-        self.refresh_geojson()
+        require_features = body.get("flood_source_mode") in {"nonempty", "rain"}
+        self.refresh_geojson(force=True, require_features=require_features)
         origin = body["origin"]
         destination = body["destination"]
         vehicle_type = body.get("vehicle_type", "motorbike")
-        flood_time_step = body.get("flood_time_step") or self.latest_timestep()
+        steps = available_timesteps(self.geojson)
+        flood_time_step = body.get("flood_time_step") or (steps[-1] if steps else "")
         costing = "motor_scooter" if vehicle_type == "motorbike" else body.get("costing", "auto")
 
         baseline_response = self.baseline(origin, destination, costing)
         baseline = route_summary(baseline_response)
-        all_flood = build_flood_features(self.geojson, flood_time_step, vehicle_type)
+        all_flood = build_flood_features(self.geojson, flood_time_step, vehicle_type) if flood_time_step else []
         selected = top_deepest_features(all_flood, MAX_ROUTE_CONSTRAINTS)
 
         if baseline.get("ok"):
@@ -378,22 +390,31 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
         elif parsed.path == "/flood/timesteps":
+            require_features = qs.get("mode", ["latest"])[0] in {"nonempty", "rain"}
+            ADAPTER.refresh_geojson(force=True, require_features=require_features)
+            timesteps = available_timesteps(ADAPTER.geojson)
             self._send(
                 200,
                 {
-                    "timesteps": ADAPTER.timesteps(),
-                    "latest_timestep": ADAPTER.latest_timestep(),
+                    "timesteps": timesteps,
+                    "latest_timestep": timesteps[-1] if timesteps else None,
                     "flood_geojson_source": ADAPTER.geojson_source,
                     "flood_geojson_last_modified": ADAPTER.geojson_source_last_modified,
                     "flood_geojson_loaded_at": ADAPTER.geojson_loaded_at,
                 },
             )
         elif parsed.path == "/flood/roads":
-            time_step = qs.get("time", [ADAPTER.latest_timestep()])[0]
+            require_features = qs.get("mode", ["latest"])[0] in {"nonempty", "rain"}
+            ADAPTER.refresh_geojson(force=True, require_features=require_features)
+            steps = available_timesteps(ADAPTER.geojson)
+            time_step = qs.get("time", [steps[-1] if steps else ""])[0]
             vehicle = qs.get("vehicle_type", ["motorbike"])[0]
             self._send(200, ADAPTER.roads(time_step, vehicle))
         elif parsed.path == "/flood/polygons":
-            time_step = qs.get("time", [ADAPTER.latest_timestep()])[0]
+            require_features = qs.get("mode", ["latest"])[0] in {"nonempty", "rain"}
+            ADAPTER.refresh_geojson(force=True, require_features=require_features)
+            steps = available_timesteps(ADAPTER.geojson)
+            time_step = qs.get("time", [steps[-1] if steps else ""])[0]
             vehicle = qs.get("vehicle_type", ["motorbike"])[0]
             self._send(200, ADAPTER.polygons(time_step, vehicle))
         else:
@@ -406,14 +427,18 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/route/baseline":
                 self._send(200, ADAPTER.baseline(body["origin"], body["destination"], body.get("costing", DEFAULT_COSTING)))
             elif self.path == "/route/flood-aware":
+                require_features = body.get("flood_source_mode") in {"nonempty", "rain"}
+                ADAPTER.refresh_geojson(force=True, require_features=require_features)
+                steps = available_timesteps(ADAPTER.geojson)
                 self._send(
                     200,
                     ADAPTER.flood_aware(
                         body["origin"],
                         body["destination"],
-                        body.get("flood_time_step") or ADAPTER.latest_timestep(),
+                        body.get("flood_time_step") or (steps[-1] if steps else ""),
                         body.get("vehicle_type", "motorbike"),
                         body.get("costing", DEFAULT_COSTING),
+                        require_features,
                     ),
                 )
             elif self.path == "/route/compare":

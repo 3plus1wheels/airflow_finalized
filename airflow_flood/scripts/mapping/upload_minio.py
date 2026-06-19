@@ -136,15 +136,7 @@ def run_upload(
         print(f"Local GeoJSON validation failed: {exc}")
         return None
 
-    if feature_count == 0:
-        print("Local GeoJSON has 0 features. Skipping MinIO upload so last non-empty flood layer stays active.")
-        return {
-            "bucket": BUCKET_NAME,
-            "object_name": None,
-            "run_ts": run_ts,
-            "local_path": file_path,
-            "skipped_empty": True,
-        }
+    print(f"Local GeoJSON feature count: {feature_count}")
 
     object_name = f"{run_ts}/flood_road_{run_ts}.geojson"
     ok = upload_to_minio(file_path, object_name, run_ts)

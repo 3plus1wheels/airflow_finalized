@@ -19,6 +19,11 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+MAX_ROUTE_CONSTRAINTS = int(os.environ.get("FLOOD_MAX_ROUTE_CONSTRAINTS", "4"))
+MAX_EXCLUDE_LOCATIONS = int(os.environ.get("FLOOD_MAX_EXCLUDE_LOCATIONS", "35"))
+USE_HARD_EXCLUDES = os.environ.get("FLOOD_USE_HARD_EXCLUDES", "false").lower() == "true"
+PROBE_EDGE_WALKABLE = os.environ.get("FLOOD_PROBE_EDGE_WALKABLE", "false").lower() == "true"
+
 from flood_utils import (  # noqa: E402
     DATA_FILE,
     DEFAULT_COSTING,
@@ -45,6 +50,7 @@ class FloodConstraintAdapter:
         self.valhalla_url = valhalla_url
         self.geojson_source = ""
         self.geojson_source_last_modified = ""
+        self.geojson_loaded_at = ""
         self.geojson = {}
         self._last_refresh = 0.0
         self._refresh_interval = int(os.environ.get("FLOOD_REFRESH_SECONDS", "30"))
@@ -63,6 +69,7 @@ class FloodConstraintAdapter:
         self.geojson = geojson
         self.geojson_source = source
         self.geojson_source_last_modified = last_modified
+        self.geojson_loaded_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
     def _load_latest_minio_geojson(self) -> tuple[dict, str, str]:
         bucket = os.environ.get("FLOOD_MINIO_BUCKET")
@@ -114,6 +121,12 @@ class FloodConstraintAdapter:
         self.refresh_geojson()
         return available_timesteps(self.geojson)
 
+    def latest_timestep(self) -> str:
+        steps = self.timesteps()
+        if not steps:
+            raise ValueError("no flood timesteps found")
+        return steps[-1]
+
     def roads(self, time_step: str, vehicle_type: str = "motorbike") -> dict:
         self.refresh_geojson()
         features = build_flood_features(self.geojson, time_step, vehicle_type, include_factor_one=True)
@@ -136,7 +149,7 @@ class FloodConstraintAdapter:
 
     def _hard_exclusions(self, features: list, min_depth_m: float = 0.20) -> dict:
         blocked_features = dangerous_flood_features(features, min_depth_m)
-        locations = exclude_locations_from_features(blocked_features)
+        locations = exclude_locations_from_features(blocked_features, max_points_per_feature=1)[:MAX_EXCLUDE_LOCATIONS]
         return {
             "min_depth_m": min_depth_m,
             "count": len(locations),
@@ -156,10 +169,10 @@ class FloodConstraintAdapter:
         baseline = self.baseline(origin, destination, costing)
         summary = route_summary(baseline)
         all_flood = build_flood_features(self.geojson, flood_time_step, vehicle_type)
-        selected = top_deepest_features(all_flood, 80)
+        selected = top_deepest_features(all_flood, MAX_ROUTE_CONSTRAINTS)
         if summary.get("ok"):
             route_shape = decode_polyline(summary.get("shape"))
-            near = select_features_near_route(route_shape, all_flood, threshold_m=30, max_count=80)
+            near = select_features_near_route(route_shape, all_flood, threshold_m=30, max_count=MAX_ROUTE_CONSTRAINTS)
             if near:
                 selected = near
         selected = self._edge_walkable(selected, costing)
@@ -170,9 +183,9 @@ class FloodConstraintAdapter:
             destination,
             costing,
             linear,
-            exclude_locations=hard_exclusions["locations"],
+            exclude_locations=hard_exclusions["locations"] if USE_HARD_EXCLUDES else None,
         )
-        response = post_valhalla_route(request, self.valhalla_url)
+        response = self._post_constrained_route(request, origin, destination, costing, selected)
         response["linear_cost_factors"] = {
             "count": len(linear),
             "max_factor": max((item.factor for item in selected), default=0),
@@ -187,17 +200,17 @@ class FloodConstraintAdapter:
         origin = body["origin"]
         destination = body["destination"]
         vehicle_type = body.get("vehicle_type", "motorbike")
-        flood_time_step = body.get("flood_time_step") or self.timesteps()[0]
+        flood_time_step = body.get("flood_time_step") or self.latest_timestep()
         costing = "motor_scooter" if vehicle_type == "motorbike" else body.get("costing", "auto")
 
         baseline_response = self.baseline(origin, destination, costing)
         baseline = route_summary(baseline_response)
         all_flood = build_flood_features(self.geojson, flood_time_step, vehicle_type)
-        selected = top_deepest_features(all_flood, 80)
+        selected = top_deepest_features(all_flood, MAX_ROUTE_CONSTRAINTS)
 
         if baseline.get("ok"):
             selected_near = select_features_near_route(
-                decode_polyline(baseline.get("shape")), all_flood, threshold_m=30, max_count=80
+                decode_polyline(baseline.get("shape")), all_flood, threshold_m=30, max_count=MAX_ROUTE_CONSTRAINTS
             )
             if selected_near:
                 selected = selected_near
@@ -205,15 +218,19 @@ class FloodConstraintAdapter:
         selected = self._edge_walkable(selected, costing)
         linear = [to_linear_cost_factor_feature(item) for item in selected]
         hard_exclusions = self._hard_exclusions(selected)
-        flood_response = post_valhalla_route(
-            route_request(
-                origin,
-                destination,
-                costing,
-                linear,
-                exclude_locations=hard_exclusions["locations"],
-            ),
-            self.valhalla_url,
+        flood_request = route_request(
+            origin,
+            destination,
+            costing,
+            linear,
+            exclude_locations=hard_exclusions["locations"] if USE_HARD_EXCLUDES else None,
+        )
+        flood_response = self._post_constrained_route(
+            flood_request,
+            origin,
+            destination,
+            costing,
+            selected,
         )
         flood = route_summary(flood_response)
 
@@ -266,8 +283,10 @@ class FloodConstraintAdapter:
         }
 
     def _edge_walkable(self, features: list, costing: str) -> list:
+        if not PROBE_EDGE_WALKABLE:
+            return features[:MAX_ROUTE_CONSTRAINTS]
         kept = []
-        for item in features:
+        for item in features[:MAX_ROUTE_CONSTRAINTS]:
             probe = route_request(
                 costing=costing,
                 linear_cost_factors=[to_linear_cost_factor_feature(item)],
@@ -275,6 +294,43 @@ class FloodConstraintAdapter:
             if post_valhalla_route(probe, self.valhalla_url).get("ok"):
                 kept.append(item)
         return kept
+
+    def _post_constrained_route(
+        self,
+        request: dict,
+        origin: dict,
+        destination: dict,
+        costing: str,
+        selected: list,
+    ) -> dict:
+        response = post_valhalla_route(request, self.valhalla_url)
+        if response.get("ok"):
+            return response
+
+        tried = {len(selected)}
+        size = len(selected) // 2
+        while size > 0:
+            if size not in tried:
+                lighter = route_request(
+                    origin,
+                    destination,
+                    costing,
+                    [to_linear_cost_factor_feature(item) for item in selected[:size]],
+                )
+                retry = post_valhalla_route(lighter, self.valhalla_url)
+                if retry.get("ok"):
+                    retry["constraint_warning"] = response.get("error", "full constraint route failed")
+                    retry["constraint_count_used"] = size
+                    return retry
+                tried.add(size)
+            size //= 2
+
+        fallback = post_valhalla_route(route_request(origin, destination, costing), self.valhalla_url)
+        if fallback.get("ok"):
+            fallback["constraint_warning"] = response.get("error", "all constrained route attempts failed")
+            fallback["constraint_count_used"] = 0
+            return fallback
+        return response
 
 
 ADAPTER = FloodConstraintAdapter(os.environ.get("VALHALLA_URL", "http://localhost:8002"))
@@ -309,16 +365,26 @@ class Handler(BaseHTTPRequestHandler):
                     "bbox": bbox,
                     "flood_geojson_source": ADAPTER.geojson_source,
                     "flood_geojson_last_modified": ADAPTER.geojson_source_last_modified,
+                    "flood_geojson_loaded_at": ADAPTER.geojson_loaded_at,
                 },
             )
         elif parsed.path == "/flood/timesteps":
-            self._send(200, {"timesteps": ADAPTER.timesteps()})
+            self._send(
+                200,
+                {
+                    "timesteps": ADAPTER.timesteps(),
+                    "latest_timestep": ADAPTER.latest_timestep(),
+                    "flood_geojson_source": ADAPTER.geojson_source,
+                    "flood_geojson_last_modified": ADAPTER.geojson_source_last_modified,
+                    "flood_geojson_loaded_at": ADAPTER.geojson_loaded_at,
+                },
+            )
         elif parsed.path == "/flood/roads":
-            time_step = qs.get("time", [ADAPTER.timesteps()[0]])[0]
+            time_step = qs.get("time", [ADAPTER.latest_timestep()])[0]
             vehicle = qs.get("vehicle_type", ["motorbike"])[0]
             self._send(200, ADAPTER.roads(time_step, vehicle))
         elif parsed.path == "/flood/polygons":
-            time_step = qs.get("time", [ADAPTER.timesteps()[0]])[0]
+            time_step = qs.get("time", [ADAPTER.latest_timestep()])[0]
             vehicle = qs.get("vehicle_type", ["motorbike"])[0]
             self._send(200, ADAPTER.polygons(time_step, vehicle))
         else:
@@ -336,7 +402,7 @@ class Handler(BaseHTTPRequestHandler):
                     ADAPTER.flood_aware(
                         body["origin"],
                         body["destination"],
-                        body.get("flood_time_step") or ADAPTER.timesteps()[0],
+                        body.get("flood_time_step") or ADAPTER.latest_timestep(),
                         body.get("vehicle_type", "motorbike"),
                         body.get("costing", DEFAULT_COSTING),
                     ),

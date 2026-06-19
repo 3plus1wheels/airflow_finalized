@@ -12,6 +12,14 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "&copy; OpenStreetMap contributors",
 }).addTo(map);
 
+const sourceControl = L.control({ position: "bottomleft" });
+sourceControl.onAdd = () => {
+  const div = L.DomUtil.create("div", "source-control");
+  div.innerHTML = '<strong>Water level source</strong><span>Loading...</span>';
+  return div;
+};
+sourceControl.addTo(map);
+
 const layers = {
   floodPolygons: L.geoJSON(null, {
     pane: "floodPolygonPane",
@@ -62,6 +70,10 @@ L.control
   .addTo(map);
 
 let pickMode = null;
+let pickRouteStep = null;
+let currentFloodTime = "";
+let currentFloodSource = "";
+let currentFloodLoadedAt = "";
 
 function floodRoadStyle(depthCm) {
   let color = "#d9822b";
@@ -297,6 +309,29 @@ function setMarkers(origin, destination) {
   L.marker([destination.lat, destination.lon], { icon: pointIcon("E", "end") }).bindPopup("End").addTo(layers.markers);
 }
 
+function setInputPoint(inputId, latlng) {
+  document.getElementById(inputId).value = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+  refreshInputMarkers();
+}
+
+function refreshInputMarkers() {
+  try {
+    const origin = parsePoint(document.getElementById("origin").value);
+    const destination = parsePoint(document.getElementById("destination").value);
+    setMarkers(origin, destination);
+  } catch {
+    layers.markers.clearLayers();
+  }
+}
+
+function setPickButtonState() {
+  const twoPinButton = document.getElementById("pick-route-pins");
+  twoPinButton.classList.toggle("active", Boolean(pickRouteStep));
+  if (pickRouteStep === "origin") twoPinButton.textContent = "Click Start";
+  else if (pickRouteStep === "destination") twoPinButton.textContent = "Click End";
+  else twoPinButton.textContent = "Pick Start + End";
+}
+
 function pointIcon(label, type) {
   return L.divIcon({
     className: `point-marker ${type}`,
@@ -315,19 +350,45 @@ async function getJson(path, options) {
 
 async function loadTimesteps() {
   const data = await getJson("/flood/timesteps");
-  const select = document.getElementById("time-step");
-  select.innerHTML = "";
-  for (const step of data.timesteps) {
-    const option = document.createElement("option");
-    option.value = step;
-    option.textContent = step;
-    select.appendChild(option);
-  }
+  currentFloodTime = data.latest_timestep || data.timesteps?.[data.timesteps.length - 1] || "";
+  updateFloodSourceInfo(data);
+}
+
+function updateFloodSourceInfo(data) {
+  const el = document.querySelector(".source-control");
+  if (!el) return;
+  const source = data.flood_geojson_source || "unknown";
+  const loadedAt = data.flood_geojson_loaded_at || "";
+  const modified = data.flood_geojson_last_modified || "";
+  const fileName = source.split(/[\\/]/).pop() || source;
+  currentFloodSource = fileName;
+  currentFloodLoadedAt = loadedAt;
+  const title = modified ? `Modified: ${formatTimestamp(modified)}` : source;
+  el.innerHTML = `
+    <strong>Water level source</strong>
+    <span title="${escapeHtml(source)}">${escapeHtml(fileName)}</span>
+    <small title="${escapeHtml(title)}">Pulled ${escapeHtml(formatTimestamp(loadedAt))}</small>
+    <small>Latest flood time ${escapeHtml(formatTimestamp(data.latest_timestep || currentFloodTime))}</small>
+  `;
+}
+
+function formatTimestamp(value) {
+  if (!value) return "n/a";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 async function loadFloodLayers() {
-  const time = document.getElementById("time-step").value;
+  const time = currentFloodTime;
   const vehicle = document.getElementById("vehicle").value;
+  document.getElementById("result").innerHTML = `<div class="badge neutral">LOADING</div><p>Flood time: ${escapeHtml(time || "n/a")}</p>`;
   const query = `time=${encodeURIComponent(time)}&vehicle_type=${encodeURIComponent(vehicle)}`;
   const [polygons, roads] = await Promise.all([
     getJson(`/flood/polygons?${query}`),
@@ -337,13 +398,46 @@ async function loadFloodLayers() {
   layers.floodPolygons.addData(polygons);
   layers.floodRoads.clearLayers();
   layers.floodRoads.addData(roads);
+  fitFloodBounds();
+  renderFloodLoadResult(polygons, roads, time, vehicle);
+}
+
+function fitFloodBounds() {
+  const bounds = L.latLngBounds([]);
+  [layers.floodPolygons, layers.floodRoads].forEach((group) => {
+    group.eachLayer((layer) => {
+      if (layer.getBounds) bounds.extend(layer.getBounds());
+      else if (layer.getLatLng) bounds.extend(layer.getLatLng());
+    });
+  });
+  if (bounds.isValid()) map.fitBounds(bounds.pad(0.12));
+}
+
+function renderFloodLoadResult(polygons, roads, time, vehicle) {
+  const polygonCount = polygons.features?.length || 0;
+  const roadCount = roads.features?.length || 0;
+  document.getElementById("result").innerHTML = `
+    <div class="badge neutral">LOADED</div>
+    <div class="metric-grid">
+      <div class="metric"><strong>Vehicle</strong>${escapeHtml(vehicle)}</div>
+      <div class="metric"><strong>Flood time</strong>${escapeHtml(formatTimestamp(time))}</div>
+      <div class="metric"><strong>Flood roads</strong>${roadCount}</div>
+      <div class="metric"><strong>Flood polygons</strong>${polygonCount}</div>
+      <div class="metric"><strong>File</strong>${escapeHtml(currentFloodSource || "n/a")}</div>
+      <div class="metric"><strong>Pulled</strong>${escapeHtml(formatTimestamp(currentFloodLoadedAt))}</div>
+    </div>
+  `;
 }
 
 async function runCompare() {
   const origin = parsePoint(document.getElementById("origin").value);
   const destination = parsePoint(document.getElementById("destination").value);
   const vehicle = document.getElementById("vehicle").value;
-  const floodTime = document.getElementById("time-step").value;
+  const floodTime = currentFloodTime;
+  document.getElementById("result").innerHTML = `
+    <div class="badge neutral">ROUTING</div>
+    <p>Calculating custom route...</p>
+  `;
   setMarkers(origin, destination);
 
   const payload = {
@@ -458,20 +552,37 @@ function fmt(value) {
 }
 
 map.on("click", (event) => {
+  if (pickRouteStep) {
+    setInputPoint(pickRouteStep, event.latlng);
+    pickRouteStep = pickRouteStep === "origin" ? "destination" : null;
+    setPickButtonState();
+    return;
+  }
   if (!pickMode) return;
-  const value = `${event.latlng.lat.toFixed(6)}, ${event.latlng.lng.toFixed(6)}`;
-  document.getElementById(pickMode).value = value;
+  setInputPoint(pickMode, event.latlng);
   pickMode = null;
 });
 
 document.getElementById("pick-origin").addEventListener("click", () => {
   pickMode = "origin";
+  pickRouteStep = null;
+  setPickButtonState();
 });
 document.getElementById("pick-destination").addEventListener("click", () => {
   pickMode = "destination";
+  pickRouteStep = null;
+  setPickButtonState();
 });
-document.getElementById("time-step").addEventListener("change", loadFloodLayers);
-document.getElementById("vehicle").addEventListener("change", loadFloodLayers);
+document.getElementById("pick-route-pins").addEventListener("click", () => {
+  pickMode = null;
+  pickRouteStep = pickRouteStep ? null : "origin";
+  setPickButtonState();
+});
+document.getElementById("vehicle").addEventListener("change", () => {
+  loadFloodLayers().catch((error) => {
+    document.getElementById("result").innerHTML = `<div class="badge fail">ERROR</div><p>${escapeHtml(error.message)}</p>`;
+  });
+});
 document.getElementById("route").addEventListener("click", () => {
   runCompare().catch((error) => {
     document.getElementById("result").innerHTML = `<div class="badge fail">ERROR</div><p>${escapeHtml(error.message)}</p>`;

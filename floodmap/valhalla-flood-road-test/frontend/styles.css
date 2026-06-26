@@ -565,7 +565,14 @@ input:focus {
 }
 
 .water-histogram {
-  min-height: 174px;
+  min-height: 192px;
+}
+
+.histogram-meta {
+  margin: 0 0 6px;
+  color: #aeb7bd;
+  font-size: 11px;
+  line-height: 1.2;
 }
 
 .histogram-chart {
@@ -596,8 +603,29 @@ input:focus {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 24%);
 }
 
-.water-bar span {
+.water-bar .bar-value {
   display: none;
+}
+
+.water-bar.show-value .bar-value {
+  position: absolute;
+  inset: 5px 3px auto;
+  display: block;
+  overflow: hidden;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-overflow: clip;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 40%);
+  white-space: nowrap;
+}
+
+.water-bar.show-value .bar-value small {
+  margin-left: 1px;
+  font-size: 8px;
+  font-weight: 700;
 }
 
 .water-bar.low {
@@ -704,23 +732,26 @@ input:focus {
   width: 100%;
   min-height: 64px;
   padding: 10px;
-  border: 1px solid rgb(255 255 255 / 10%);
+  border: 1px solid rgb(139 158 170 / 22%);
   border-radius: 8px;
-  color: #f4f7f8;
-  background: #20262b;
+  color: #e7f3f6;
+  background: #1e252a;
   text-align: left;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
 }
 
 .route-card.active {
-  border-color: #69d6ee;
-  background: #25313a;
+  border-color: var(--route-accent, #00b8d9);
+  background: #22313a;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 10%), inset 0 1px 0 rgb(255 255 255 / 5%);
 }
 
 .route-card-color {
   width: 5px;
   height: 42px;
   border-radius: 999px;
-  background: #69d6ee;
+  background: var(--route-accent, #00b8d9);
+  box-shadow: 0 0 12px rgb(255 255 255 / 14%);
 }
 
 .route-card strong,
@@ -731,14 +762,31 @@ input:focus {
 }
 
 .route-card strong {
+  color: #eaf7fb;
   font-size: 13px;
+  font-weight: 900;
   overflow-wrap: anywhere;
 }
 
 .route-card small {
   margin-top: 4px;
-  color: #aeb7bd;
+  color: #a8cbd3;
   font-size: 12px;
+}
+
+.leaflet-tooltip.route-tooltip {
+  padding: 5px 7px;
+  border: 1px solid rgb(12 35 42 / 70%);
+  border-radius: 6px;
+  color: #071318;
+  background: #c9f7ff;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 26%);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.leaflet-tooltip.route-tooltip::before {
+  display: none;
 }
 
 .route-card em {
@@ -752,13 +800,14 @@ input:focus {
 }
 
 .route-card em.safe {
-  color: #bdf5d7;
-  background: rgb(53 183 121 / 14%);
+  color: #c5ffe0;
+  background: rgb(53 183 121 / 18%);
 }
 
 .route-card em.danger {
   color: #ffd5d2;
-  background: rgb(215 51 51 / 18%);
+  background: rgb(210 60 74 / 24%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
 }
 
 .directions {

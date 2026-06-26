@@ -6,7 +6,12 @@ const DEFAULT_VEHICLES = {
   car: { label_vi: "Ô tô", label_en: "Car", threshold_cm: 30 },
   truck: { label_vi: "Xe tải", label_en: "Truck", threshold_cm: 50 },
 };
-const ROUTE_COLORS = ["#5fd7ef", "#d7dde2", "#9ca3af"];
+const ROUTE_STYLES = {
+  recommended: { color: "#00b8ff", label: "Optimal flood-aware" },
+  alternate: { color: "#ff2d95", label: "Alternative" },
+  alternateWarm: { color: "#ff9f1c", label: "Alternative" },
+};
+const ROUTE_FALLBACKS = [ROUTE_STYLES.recommended, ROUTE_STYLES.alternate, ROUTE_STYLES.alternateWarm];
 
 const state = {
   activeVehicle: "motorbike",
@@ -421,11 +426,18 @@ function renderBestDeparture() {
     ? `${best.label_vi} / ${best.label_en}`
     : "đi ngay / go now";
   document.getElementById("threshold-label").textContent = `${Math.round(threshold)} cm`;
+  if (best?.status === "none") {
+    document.getElementById("best-departure").textContent =
+      "khong co khung an toan trong 4h hien thi / no safe 30-min window in visible 4h";
+  } else if (best?.outside_visible) {
+    document.getElementById("best-departure").textContent =
+      "khung an toan nam ngoai 4h hien thi / safe window outside visible 4h";
+  }
 }
 
 function renderHistogram() {
   const container = document.getElementById("water-histogram");
-  const bars = state.forecast?.forecast_by_vehicle?.[state.activeVehicle] || [];
+  const bars = (state.forecast?.forecast_by_vehicle?.[state.activeVehicle] || []).slice(0, 8);
   const threshold = state.forecast?.thresholds_cm?.[state.activeVehicle] || DEFAULT_VEHICLES[state.activeVehicle].threshold_cm;
   if (!bars.length) {
     container.innerHTML = `<div class="empty-state">Chưa có dự báo / No forecast</div>`;
@@ -438,6 +450,7 @@ function renderHistogram() {
     .map((bar) => `<span style="grid-column:${bar.index + 1} / span 2">${escapeHtml(bar.label)}</span>`)
     .join("");
   container.innerHTML = `
+    <div class="histogram-meta">4h route-depth forecast / du bao do sau tren tuyen 4h</div>
     <div class="histogram-chart" style="--threshold-bottom:${thresholdBottom}%; --histogram-scale:${maxDepth};">
       <div class="threshold-line" aria-hidden="true"></div>
       <div class="histogram-bars">
@@ -460,9 +473,11 @@ function renderHistogramBar(bar, maxDepth) {
   const classes = ["water-bar", bar.severity || "low"];
   if (bar.is_now) classes.push("now");
   if (!bar.safe) classes.push("unsafe");
+  if (height >= 24 && depth > 0) classes.push("show-value");
+  const valueLabel = depth >= 100 ? `${Math.round(depth)}` : depth.toFixed(depth < 10 ? 1 : 0);
   return `
     <button class="${classes.join(" ")}" type="button" title="${escapeHtml(bar.label)}: ${depth.toFixed(1)} cm" style="--bar-height:${height}%">
-      <span>${depth.toFixed(0)}</span>
+      <span class="bar-value">${escapeHtml(valueLabel)}<small>cm</small></span>
     </button>
   `;
 }
@@ -476,14 +491,16 @@ function renderRouteOptions() {
     return;
   }
   const selectedId = activeRouteId();
-  container.innerHTML = routes.map((route) => {
+  container.innerHTML = routes.map((route, index) => {
     const active = route.id === selectedId ? "active" : "";
     const depthClass = route.crosses_threshold ? "danger" : "safe";
+    const style = routeStyle(route, index);
+    const label = routeDisplayLabel(index);
     return `
-      <button class="route-card ${active}" type="button" data-route-id="${escapeHtml(route.id)}">
+      <button class="route-card ${active}" type="button" data-route-id="${escapeHtml(route.id)}" style="--route-accent:${style.color}">
         <span class="route-card-color"></span>
         <span>
-          <strong>${escapeHtml(route.label_vi)} / ${escapeHtml(route.label_en)}</strong>
+          <strong>${escapeHtml(label.vi)} / ${escapeHtml(label.en)}</strong>
           <small>${formatMinutes(route.duration_min)} • ${formatKm(route.distance_km)}</small>
         </span>
         <em class="${depthClass}">max ${formatCm(route.max_depth_cm)}</em>
@@ -554,22 +571,54 @@ function drawRoutes(shouldFit) {
       const coords = routeCoords(route.route);
       if (!coords.length) return;
       const selected = route.id === selectedId;
+      const routeIndex = routes.findIndex((item) => item.id === route.id);
+      const style = routeStyle(route, routeIndex);
+      L.polyline(coords, {
+        color: "#102027",
+        weight: selected ? 13 : 11,
+        opacity: selected ? 0.7 : 0.62,
+        pane: "routePane",
+        interactive: false,
+      }).addTo(layers.routes);
       const line = L.polyline(coords, {
-        color: selected ? ROUTE_COLORS[0] : ROUTE_COLORS[(index % (ROUTE_COLORS.length - 1)) + 1],
-        weight: selected ? 8 : 5,
-        opacity: selected ? 0.96 : 0.46,
+        color: style.color,
+        weight: selected ? 9 : 7,
+        opacity: 1,
         pane: "routePane",
       }).addTo(layers.routes);
       line.on("click", () => {
         state.activeRouteByVehicle[state.activeVehicle] = route.id;
         renderForecast();
       });
-      line.bindTooltip(`${route.label_vi} / ${route.label_en}: ${formatMinutes(route.duration_min)}`);
+      line.bindTooltip(
+        `${style.label}: ${formatMinutes(route.duration_min)} - max ${formatCm(route.max_depth_cm)}`,
+        { className: "route-tooltip", sticky: true },
+      );
       bounds.extend(line.getBounds());
     });
 
   layers.markers.eachLayer((layer) => bounds.extend(layer.getLatLng()));
   if (shouldFit && bounds.isValid()) map.fitBounds(bounds.pad(0.18));
+}
+
+function routeStyle(route, index) {
+  const routeOrderStyle = ROUTE_FALLBACKS[Math.max(0, index) % ROUTE_FALLBACKS.length];
+  if (Number.isFinite(index)) return routeOrderStyle;
+  const source = String(route?.source || route?.label_en || route?.label_vi || "").toLowerCase();
+  if (source.includes("fast")) return ROUTE_STYLES.alternateWarm;
+  if (source.includes("alternate") || source.includes("other") || source.includes("khac")) {
+    return ROUTE_STYLES.alternate;
+  }
+  if (source.includes("recommend") || source.includes("safe") || source.includes("flood")) {
+    return ROUTE_STYLES.recommended;
+  }
+  return ROUTE_STYLES.recommended;
+}
+
+function routeDisplayLabel(index) {
+  return index === 0
+    ? { vi: "De xuat", en: "Recommended" }
+    : { vi: "Tuyen khac", en: "Alternative" };
 }
 
 function activeRoutes() {

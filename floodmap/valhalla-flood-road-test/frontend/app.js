@@ -22,6 +22,7 @@ const state = {
   currentFloodTime: "",
   currentFloodSource: "",
   currentFloodLoadedAt: "",
+  availableFloodTimesteps: [],
   floodSourceMode: "rain",
 };
 
@@ -282,8 +283,20 @@ async function getJson(path, options) {
 async function loadTimesteps() {
   const modeQuery = state.floodSourceMode === "rain" ? "?mode=nonempty" : "";
   const data = await getJson(`/flood/timesteps${modeQuery}`);
+  state.availableFloodTimesteps = Array.isArray(data.timesteps) ? data.timesteps : [];
   state.currentFloodTime = data.latest_timestep || data.timesteps?.[data.timesteps.length - 1] || "";
   updateFloodSourceInfo(data);
+}
+
+function snapDepartureToFloodWindowStart() {
+  const firstStep = state.availableFloodTimesteps[0] || state.currentFloodTime;
+  const value = timestepToInputValue(firstStep);
+  if (value) document.getElementById("departure").value = value;
+}
+
+function timestepToInputValue(value) {
+  const match = String(value || "").match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+  return match ? match[1] : "";
 }
 
 function updateFloodSourceInfo(data) {
@@ -715,6 +728,7 @@ document.getElementById("rain-source").addEventListener("click", () => {
   state.floodSourceMode = state.floodSourceMode === "rain" ? "latest" : "rain";
   syncSourceButton();
   loadTimesteps()
+    .then(() => snapDepartureToFloodWindowStart())
     .then(loadFloodLayers)
     .then(runForecast)
     .catch((error) => renderStatus("fail", "ERROR", error.message));

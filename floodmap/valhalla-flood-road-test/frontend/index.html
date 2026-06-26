@@ -3,57 +3,95 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Valhalla Flood Road Test</title>
+    <title>Flood Route Forecast</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIINfQgbWgq0U0K2rEjcwM4Q1xQOVw5+QHk="
       crossorigin=""
     />
-    <link rel="stylesheet" href="./styles.css?v=20260619-popup" />
+    <link rel="stylesheet" href="./styles.css?v=20260619-popup-solid-route-forecast" />
   </head>
   <body>
     <main class="app">
-      <aside class="panel">
-        <h1>Valhalla Flood Road Test</h1>
-        <details class="panel-section" open>
-          <summary>Route Setup</summary>
-          <div class="field">
-            <label for="origin">Origin lat, lon</label>
+      <section id="map"></section>
+      <section class="route-sheet" aria-label="Flood route forecast">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <header class="sheet-header">
+          <div>
+            <p class="eyebrow">Lộ trình tránh ngập / Flood route</p>
+            <h1>Đi an toàn hơn / Safer trip</h1>
+          </div>
+          <div class="sheet-actions">
+            <button id="rain-source" class="icon-button" type="button" title="Latest rain file">Mưa</button>
+          </div>
+        </header>
+
+        <section class="route-form" aria-label="Route setup">
+          <label>
+            <span>Điểm đi / Origin</span>
             <input id="origin" value="21.0214, 105.7610" />
-          </div>
-          <div class="field">
-            <label for="destination">Destination lat, lon</label>
+          </label>
+          <label>
+            <span>Điểm đến / Destination</span>
             <input id="destination" value="21.0225, 105.7650" />
-          </div>
-          <div class="field">
-            <label for="vehicle">Vehicle</label>
-            <select id="vehicle">
-              <option value="motorbike">Motorbike</option>
-              <option value="car">Car</option>
-              <option value="truck">Truck</option>
-            </select>
-          </div>
+          </label>
+          <label>
+            <span>Khởi hành / Depart</span>
+            <input id="departure" type="datetime-local" />
+          </label>
           <div class="button-row">
-            <button id="pick-origin" type="button">Pick Start</button>
-            <button id="pick-destination" type="button">Pick End</button>
-            <button id="pick-route-pins" type="button">Pick Start + End</button>
-            <button id="rain-source" type="button">Latest Rain File</button>
-            <button id="route" type="button">Route</button>
+            <button id="pick-origin" type="button">Chọn đi / Start</button>
+            <button id="pick-destination" type="button">Chọn đến / End</button>
+            <button id="pick-route-pins" type="button">Chọn 2 điểm / Pick both</button>
+            <button id="route" type="button">Tìm đường / Route</button>
           </div>
-        </details>
-        <section id="result" class="result">
+        </section>
+
+        <nav id="vehicle-tabs" class="vehicle-tabs" aria-label="Vehicle ETA"></nav>
+
+        <section id="status-panel" class="status-panel">
           <div class="badge neutral">READY</div>
           <p>Backend: http://127.0.0.1:8010</p>
         </section>
-      </aside>
-      <section id="map"></section>
+
+        <section class="water-panel" aria-label="Water forecast">
+          <header class="section-title">
+            <div>
+              <h2>Mực nước / Water level</h2>
+              <p id="best-departure">đi ngay / go now</p>
+            </div>
+            <span id="threshold-label">20 cm</span>
+          </header>
+          <div id="water-histogram" class="water-histogram"></div>
+        </section>
+
+        <section class="route-options-panel" aria-label="Route alternatives">
+          <header class="section-title">
+            <div>
+              <h2>Tuyến thay thế / Alternatives</h2>
+              <p id="route-count">0 routes</p>
+            </div>
+          </header>
+          <div id="route-options" class="route-options"></div>
+        </section>
+
+        <section class="steps-panel" aria-label="Directions">
+          <header class="section-title">
+            <div>
+              <h2>Chỉ đường / Directions</h2>
+              <p id="route-summary">No route yet</p>
+            </div>
+          </header>
+          <ol id="directions" class="directions"></ol>
+        </section>
+      </section>
     </main>
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <script src="./app.js?v=20260619-popup"></script>
+    <script src="./app.js?v=20260619-popup-solid-route-forecast"></script>
   </body>
 </html>

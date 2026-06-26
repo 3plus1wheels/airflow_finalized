@@ -20,28 +20,12 @@ DEPTH_ROOT_DIR = os.path.join(DATA_PATH, "output_depths")
 ROADS_GEOJSON_PATH = os.path.join(DATA_PATH, "inputs", "toa-do-duong-hanoi.geojson")
 GEOJSON_ROOT_DIR = os.path.join(DATA_PATH, "output_geojsons")
 FINAL_OUTPUT_ROOT_DIR = os.path.join(DATA_PATH, "output_final")
-LOCAL_GEOJSON_ROOT_DIR = os.getenv(
-    "LOCAL_GEOJSON_DIR", os.path.join(DATA_PATH, "output_road_geojson")
-)
-FLOOD_MAPPING_SCHEDULE = os.getenv("FLOOD_MAPPING_SCHEDULE")
-if FLOOD_MAPPING_SCHEDULE and FLOOD_MAPPING_SCHEDULE.lower() in {"none", "null", "manual"}:
-    FLOOD_MAPPING_SCHEDULE = None
-USE_DOWNLOADED_RESULTS = os.getenv("FLOOD_USE_DOWNLOADED_RESULTS", "true").lower() in {
+FLOOD_MAPPING_SCHEDULE = os.getenv("FLOOD_MAPPING_SCHEDULE", "*/30 * * * *")
+USE_DOWNLOADED_RESULTS = os.getenv("FLOOD_USE_DOWNLOADED_RESULTS", "false").lower() in {
     "1",
     "true",
     "yes",
 }
-KEEP_LOCAL_GEOJSON = os.getenv("KEEP_LOCAL_GEOJSON", "false").lower() in {
-    "1",
-    "true",
-    "yes",
-}
-
-
-def require_file(path, label):
-    if not path or not os.path.exists(path):
-        raise FileNotFoundError(f"Missing {label}: {path}")
-    return path
 
 
 def task_run_simulation(**kwargs):
@@ -71,16 +55,15 @@ def task_calculate_depth(**kwargs):
     import calculate_depth
 
     ti = kwargs["ti"]
-    nc_path = ti.xcom_pull(task_ids="2_download_results", key="nc_path")
-    if not USE_DOWNLOADED_RESULTS:
-        print(f"Using fixture NetCDF for test mapping: {FIXTURE_RESULT_NC}")
-        nc_path = FIXTURE_RESULT_NC
+    nc_path = FIXTURE_RESULT_NC
+    if USE_DOWNLOADED_RESULTS:
+        nc_path = ti.xcom_pull(task_ids="2_download_results", key="nc_path")
 
-    print("3. Calculating Depth...")
+    print(f"3. Calculating Depth from: {nc_path}")
     output_uuid_dir = calculate_depth.run_calculate_depth(
-        grid_path=require_file(INPUT_GRID, "3Di grid admin file"),
-        nc_path=require_file(nc_path, "downloaded 3Di result NetCDF"),
-        dem_path=require_file(INPUT_DEM, "DEM raster"),
+        grid_path=INPUT_GRID,
+        nc_path=nc_path,
+        dem_path=INPUT_DEM,
         output_dir=DEPTH_ROOT_DIR,
     )
 
@@ -130,25 +113,22 @@ def task_mapping_geojson(**kwargs):
 
     ti = kwargs["ti"]
     merged_flood_file = ti.xcom_pull(task_ids="5_merge_geojson")
-    run_ts = ti.xcom_pull(task_ids="5_merge_geojson", key="run_ts")
-    if not run_ts:
-        run_ts = kwargs.get("ts_nodash") or datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
     if not merged_flood_file or not os.path.exists(merged_flood_file):
-        raise ValueError(f"Missing merged flood file: {merged_flood_file}")
+        raise ValueError(f"Merged flood file not found: {merged_flood_file}")
 
     print("6. Mapping flood -> roads")
     print(f"   Input flood: {merged_flood_file}")
 
-    mapping_output_dir = os.path.join(LOCAL_GEOJSON_ROOT_DIR, run_ts)
+    mapping_output_dir = os.path.dirname(merged_flood_file)
     mapping_output_file = os.path.join(
         mapping_output_dir,
-        f"flood_road_{run_ts}.geojson",
+        "road_flood_timeseries_generated.geojson",
     )
 
     print(f"   Output mapping: {mapping_output_file}")
     out_path = mapping.mapping_geojson.build_road_flood_timeseries_geojson(
-        road_path=require_file(ROADS_GEOJSON_PATH, "roads GeoJSON"),
+        road_path=ROADS_GEOJSON_PATH,
         flood_path=merged_flood_file,
         out_path=mapping_output_file,
     )
@@ -169,10 +149,10 @@ def task_upload_minio(**kwargs):
         run_ts = kwargs.get("ts_nodash") or datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
     result = mapping.upload_minio.run_upload(
-        file_path=require_file(mapping_file, "mapped flood road GeoJSON"),
+        file_path=mapping_file,
         geojson_dir_to_clean=geojson_dir,
         tif_dir_to_clean=None,
-        delete_local_file_after_upload=not KEEP_LOCAL_GEOJSON,
+        delete_local_file_after_upload=True,
         run_ts=run_ts,
     )
 
@@ -213,14 +193,10 @@ with DAG(
     t4 = PythonOperator(
         task_id="4_extract_geojson_full", python_callable=task_extract_geojson_full
     )
-    t5 = PythonOperator(
-        task_id="5_merge_geojson", python_callable=task_merge_geojson
-    )
+    t5 = PythonOperator(task_id="5_merge_geojson", python_callable=task_merge_geojson)
     t6 = PythonOperator(
         task_id="6_mapping_geojson", python_callable=task_mapping_geojson
     )
-    t7 = PythonOperator(
-        task_id="7_upload_minio", python_callable=task_upload_minio
-    )
+    t7 = PythonOperator(task_id="7_upload_minio", python_callable=task_upload_minio)
 
     t1 >> t2 >> t3 >> t4 >> t5 >> t6 >> t7

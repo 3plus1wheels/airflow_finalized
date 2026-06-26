@@ -3,16 +3,17 @@ import cv2
 import numpy as np
 import requests
 from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
 import csv
 import os
 import boto3
 from botocore.exceptions import ClientError
+import re
 import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 # ===== Tesseract =====
@@ -44,11 +45,10 @@ def init_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
 
-    driver = webdriver.Chrome(
+    return webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
-        options=options
+        options=options,
     )
-    return driver
 
 
 # ===== OCR image value =====
@@ -72,20 +72,20 @@ def ocr_value_from_image(src):
         config="--psm 7 -c tessedit_char_whitelist=0123456789.,"
     )
 
-    return text.strip().replace(",", ".")
+    value = text.strip().replace(",", ".")
+    match = re.search(r"\d+(?:\.\d+)?", value)
+    return match.group(0) if match else ""
 
 
-# ===== generic scrape function =====
 def scrape_station_data(url, data_type):
     driver = init_driver()
     driver.get(url)
     time.sleep(8)
 
     stations = driver.find_elements(By.CSS_SELECTOR, ".border_item")
-
     data = []
 
-    for s in stations:
+    for station in stations:
         try:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -93,25 +93,28 @@ def scrape_station_data(url, data_type):
             location = ""
 
             try:
-                name = s.find_element(By.CSS_SELECTOR, ".tentram").text.strip()
+                name = station.find_element(By.CSS_SELECTOR, ".tentram").text.strip()
             except Exception:
                 pass
 
             try:
-                location = s.find_element(By.CSS_SELECTOR, ".diach2").text.strip()
+                location = station.find_element(By.CSS_SELECTOR, ".diach2").text.strip()
             except Exception:
                 pass
 
             if not name:
-                lines = [x.strip() for x in s.text.splitlines() if x.strip()]
+                lines = [
+                    line.strip()
+                    for line in station.text.splitlines()
+                    if line.strip()
+                ]
                 if len(lines) >= 1:
                     name = lines[0]
                 if len(lines) >= 2:
                     location = lines[1]
 
             value = ""
-            imgs = s.find_elements(By.CSS_SELECTOR, "img")
-
+            imgs = station.find_elements(By.CSS_SELECTOR, "img")
             for img in imgs:
                 src = img.get_attribute("src")
                 if src:

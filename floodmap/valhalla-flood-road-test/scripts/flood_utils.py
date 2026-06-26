@@ -21,6 +21,26 @@ DEFAULT_TIME = "2026-05-22T18:00:00"
 DEFAULT_COSTING = "motor_scooter"
 DEFAULT_ORIGIN = {"lat": 21.0214, "lon": 105.7610}
 DEFAULT_DESTINATION = {"lat": 21.0225, "lon": 105.7650}
+VEHICLE_PROFILES = {
+    "motorbike": {
+        "costing": "motor_scooter",
+        "threshold_cm": 20,
+        "label_vi": "Xe máy",
+        "label_en": "Motorbike",
+    },
+    "car": {
+        "costing": "auto",
+        "threshold_cm": 30,
+        "label_vi": "Ô tô",
+        "label_en": "Car",
+    },
+    "truck": {
+        "costing": "truck",
+        "threshold_cm": 50,
+        "label_vi": "Xe tải",
+        "label_en": "Truck",
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -59,10 +79,36 @@ def motorbike_factor_from_depth_m(depth_m: float) -> float:
     return 100
 
 
+def vehicle_profile(vehicle_type: str = "motorbike") -> dict[str, Any]:
+    return VEHICLE_PROFILES.get(vehicle_type, VEHICLE_PROFILES["motorbike"])
+
+
+def vehicle_costing(vehicle_type: str = "motorbike") -> str:
+    return str(vehicle_profile(vehicle_type)["costing"])
+
+
+def vehicle_threshold_cm(vehicle_type: str = "motorbike") -> float:
+    return float(vehicle_profile(vehicle_type)["threshold_cm"])
+
+
+def vehicle_types() -> list[str]:
+    return list(VEHICLE_PROFILES)
+
+
 def factor_from_depth_m(depth_m: float, vehicle_type: str = "motorbike") -> float:
-    if vehicle_type != "motorbike":
-        return motorbike_factor_from_depth_m(depth_m)
-    return motorbike_factor_from_depth_m(depth_m)
+    threshold_cm = max(vehicle_threshold_cm(vehicle_type), 1.0)
+    depth_cm = max(depth_m * 100, 0.0)
+    if depth_cm < threshold_cm * 0.15:
+        return 1
+    if depth_cm < threshold_cm * 0.25:
+        return 2
+    if depth_cm < threshold_cm * 0.50:
+        return 8
+    if depth_cm < threshold_cm * 0.75:
+        return 25
+    if depth_cm < threshold_cm:
+        return 60
+    return 100
 
 
 def feature_depth_at_time(feature: dict[str, Any], time_step: str) -> float | None:
@@ -141,7 +187,53 @@ def to_linear_cost_factor_feature(item: FloodFeature, debug_props: bool = True) 
     return {"type": "Feature", "geometry": item.geometry, "properties": props}
 
 
-def to_flood_polygon_feature(item: FloodFeature, buffer_m: float = 12.0) -> dict[str, Any]:
+def _line_buffer_polygon(coordinates: list[Any], buffer_m: float) -> list[list[float]]:
+    lats = [float(lat) for _, lat in coordinates]
+    mid_lat = sum(lats) / len(lats)
+    lon_m, lat_m = meters_per_degree(mid_lat)
+    if not lon_m or not lat_m:
+        return []
+
+    origin_lon = float(coordinates[0][0])
+    origin_lat = float(coordinates[0][1])
+    points = [
+        ((float(lon) - origin_lon) * lon_m, (float(lat) - origin_lat) * lat_m)
+        for lon, lat in coordinates
+    ]
+    if len(points) < 2:
+        x, y = points[0]
+        corners = [
+            (x - buffer_m, y - buffer_m),
+            (x + buffer_m, y - buffer_m),
+            (x + buffer_m, y + buffer_m),
+            (x - buffer_m, y + buffer_m),
+            (x - buffer_m, y - buffer_m),
+        ]
+    else:
+        normals: list[tuple[float, float]] = []
+        for index, (x, y) in enumerate(points):
+            candidates: list[tuple[float, float]] = []
+            for neighbor in (index - 1, index):
+                if neighbor < 0 or neighbor >= len(points) - 1:
+                    continue
+                nx = points[neighbor + 1][0] - points[neighbor][0]
+                ny = points[neighbor + 1][1] - points[neighbor][1]
+                length = math.hypot(nx, ny)
+                if length:
+                    candidates.append((-ny / length, nx / length))
+            avg_x = sum(item[0] for item in candidates)
+            avg_y = sum(item[1] for item in candidates)
+            avg_length = math.hypot(avg_x, avg_y)
+            normals.append((avg_x / avg_length, avg_y / avg_length) if avg_length else (0.0, 1.0))
+
+        left = [(x + nx * buffer_m, y + ny * buffer_m) for (x, y), (nx, ny) in zip(points, normals)]
+        right = [(x - nx * buffer_m, y - ny * buffer_m) for (x, y), (nx, ny) in zip(points, normals)]
+        corners = left + list(reversed(right)) + [left[0]]
+
+    return [[origin_lon + x / lon_m, origin_lat + y / lat_m] for x, y in corners]
+
+
+def to_flood_polygon_feature(item: FloodFeature, buffer_m: float = 22.0) -> dict[str, Any]:
     coordinates = item.geometry.get("coordinates", [])
     if not coordinates:
         return {
@@ -149,31 +241,13 @@ def to_flood_polygon_feature(item: FloodFeature, buffer_m: float = 12.0) -> dict
             "geometry": {"type": "Polygon", "coordinates": []},
             "properties": {},
         }
-
-    lons = [float(lon) for lon, _ in coordinates]
-    lats = [float(lat) for _, lat in coordinates]
-    mid_lat = sum(lats) / len(lats)
-    lon_m, lat_m = meters_per_degree(mid_lat)
-    lon_buffer = buffer_m / lon_m if lon_m else 0
-    lat_buffer = buffer_m / lat_m if lat_m else 0
-    min_lon = min(lons) - lon_buffer
-    max_lon = max(lons) + lon_buffer
-    min_lat = min(lats) - lat_buffer
-    max_lat = max(lats) + lat_buffer
+    polygon = _line_buffer_polygon(coordinates, buffer_m)
 
     return {
         "type": "Feature",
         "geometry": {
             "type": "Polygon",
-            "coordinates": [
-                [
-                    [min_lon, min_lat],
-                    [max_lon, min_lat],
-                    [max_lon, max_lat],
-                    [min_lon, max_lat],
-                    [min_lon, min_lat],
-                ]
-            ],
+            "coordinates": [polygon],
         },
         "properties": {
             "road_name": item.road_name,
@@ -226,6 +300,7 @@ def route_request(
     costing: str = DEFAULT_COSTING,
     linear_cost_factors: list[dict[str, Any]] | None = None,
     exclude_locations: list[dict[str, float]] | None = None,
+    alternates: int | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "locations": [origin or DEFAULT_ORIGIN, destination or DEFAULT_DESTINATION],
@@ -236,10 +311,12 @@ def route_request(
         payload["linear_cost_factors"] = linear_cost_factors
     if exclude_locations is not None:
         payload["exclude_locations"] = exclude_locations
+    if alternates:
+        payload["alternates"] = max(0, min(int(alternates), 2))
     return payload
 
 
-def post_valhalla_route(payload: dict[str, Any], url: str = VALHALLA_URL) -> dict[str, Any]:
+def post_valhalla_route(payload: dict[str, Any], url: str = VALHALLA_URL, timeout: int = 30) -> dict[str, Any]:
     req = urllib.request.Request(
         f"{url.rstrip('/')}/route",
         data=json.dumps(payload).encode("utf-8"),
@@ -247,7 +324,7 @@ def post_valhalla_route(payload: dict[str, Any], url: str = VALHALLA_URL) -> dic
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=30) as res:
+        with urllib.request.urlopen(req, timeout=timeout) as res:
             body = res.read().decode("utf-8")
             return {"ok": True, "status": res.status, "json": json.loads(body)}
     except urllib.error.HTTPError as exc:
@@ -377,14 +454,46 @@ def line_distance_m(line_a: list[tuple[float, float]], line_b: list[tuple[float,
     return best
 
 
+def line_bbox(line: list[tuple[float, float]]) -> tuple[float, float, float, float]:
+    lons = [point[0] for point in line]
+    lats = [point[1] for point in line]
+    return min(lons), min(lats), max(lons), max(lats)
+
+
+def bbox_intersects(
+    a: tuple[float, float, float, float],
+    b: tuple[float, float, float, float],
+    pad_deg: float = 0.0,
+) -> bool:
+    return not (
+        a[2] + pad_deg < b[0]
+        or b[2] + pad_deg < a[0]
+        or a[3] + pad_deg < b[1]
+        or b[3] + pad_deg < a[1]
+    )
+
+
 def flood_exposure(
     route_lonlat: list[tuple[float, float]],
     flood_features: list[FloodFeature],
     threshold_m: float = 12.0,
 ) -> dict[str, Any]:
     crossed: list[FloodFeature] = []
+    if len(route_lonlat) < 2:
+        return {
+            "crosses_flooded_road": False,
+            "affected_road_count": 0,
+            "max_depth_m": 0,
+            "max_depth_cm": 0,
+            "max_factor": 0,
+            "roads": crossed,
+        }
+    route_bbox = line_bbox(route_lonlat)
+    pad_deg = threshold_m / 111_320.0
     for item in flood_features:
         line = [(float(lon), float(lat)) for lon, lat in item.geometry.get("coordinates", [])]
+        if len(line) < 2 or not bbox_intersects(route_bbox, line_bbox(line), pad_deg):
+            continue
         if line_distance_m(route_lonlat, line) <= threshold_m:
             crossed.append(item)
     return {
@@ -404,8 +513,14 @@ def select_features_near_route(
     max_count: int = 80,
 ) -> list[FloodFeature]:
     scored: list[tuple[float, FloodFeature]] = []
+    if len(route_lonlat) < 2:
+        return []
+    route_bbox = line_bbox(route_lonlat)
+    pad_deg = threshold_m / 111_320.0
     for item in flood_features:
         line = [(float(lon), float(lat)) for lon, lat in item.geometry.get("coordinates", [])]
+        if len(line) < 2 or not bbox_intersects(route_bbox, line_bbox(line), pad_deg):
+            continue
         dist = line_distance_m(route_lonlat, line)
         if dist <= threshold_m:
             scored.append((dist, item))

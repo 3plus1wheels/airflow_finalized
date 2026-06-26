@@ -106,9 +106,12 @@ http://127.0.0.1:8010
 - `GET /flood/timesteps`
 - `GET /flood/polygons?time=2026-05-22T18:00:00`
 - `GET /flood/roads?time=2026-05-22T18:00:00`
+- `GET /flood/route/forecast?origin=21.0214,105.7610&destination=21.0225,105.7650&departure_time=2026-05-22T18:00:00&mode=nonempty&alternates=2`
 - `POST /route/baseline`
 - `POST /route/flood-aware`
 - `POST /route/compare`
+
+`/flood/route/forecast` returns bundled motorbike/car/truck ETAs, route alternatives, 8 water-level histogram bars for the visible 4h window, and best-departure labels scanned over the next 6h. Vehicle thresholds are 20/30/50 cm for motorbike/car/truck.
 
 ## Map Layers
 
